@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Pinay Stars",
+    "slug": "pinay-stars",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "icon": "./assets/logo.png",
+    "splash": {
+      "image": "./assets/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF"
+    },
+    "android": {
+      "package": "com.pinaystars.app"
+    },
+    "ios": {
+      "bundleIdentifier": "com.pinaystars.app"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "name": "Pinay Stars",
+      "shortName": "Pinay Stars",
+      "themeColor": "#65001D",
+      "backgroundColor": "#FFF9F8"
+    }
+  }
+}

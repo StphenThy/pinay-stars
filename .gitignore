@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+.expo-shared/
+.expo-export-check
+dist/
+web-build/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Secrets — real DB credentials and token secret live here, never commit
+backend/connection.php
+.env
+.env.*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.*
+yarn-error.*
