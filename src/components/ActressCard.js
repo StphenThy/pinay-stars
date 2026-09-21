@@ -9,11 +9,16 @@ import StarRating from './StarRating';
 import PressScale from './PressScale';
 import { Ionicons } from '@expo/vector-icons';
 import { haptic } from '../haptics';
+import { usePosters } from '../posters';
 
 const PARALLAX = 32; // px the portrait drifts against its frame while the carousel moves
 
 function FeaturedCard({ actress, featureLabel, favorite, onOpen, onToggle, parallax }) {
   const [expanded, setExpanded] = useState(false);
+  // Poster of her top film for the expanded footer; resolves lazily and is cached on device.
+  const topFilm = actress.films[0];
+  const posters = usePosters(expanded && topFilm ? [topFilm] : [], 'movie');
+  const topPoster = topFilm ? posters[topFilm]?.poster : null;
   // The portrait is a little wider than the card and slides the opposite way to the scroll,
   // so the photo reads as sitting behind the frame (2.5D) using nothing but the real image.
   const translateX = parallax
@@ -56,7 +61,8 @@ function FeaturedCard({ actress, featureLabel, favorite, onOpen, onToggle, paral
           <Collapsible open={expanded} maxHeight={220}>
             <Text numberOfLines={3} style={s.featuredBody}>{actress.biography}</Text>
             <View style={s.featuredFooter}>
-              <Text numberOfLines={1} style={s.featuredKnown}>Known for “{actress.films[0] || actress.occupation}”</Text>
+              {topPoster ? <Animated.Image source={{ uri: topPoster }} style={s.featuredPoster} accessibilityLabel={`Poster of ${topFilm}`} /> : null}
+              <Text numberOfLines={2} style={s.featuredKnown}>Known for “{topFilm || actress.occupation}”</Text>
               <Button label="View Profile" variant="secondary" small onPress={onOpen} />
             </View>
           </Collapsible>
@@ -180,6 +186,7 @@ const s = StyleSheet.create({
   featuredMeta: { flexDirection: 'row', alignItems: 'baseline', marginTop: space.xs },
   featuredBody: { ...type.small, color: colors.onDark, marginTop: space.sm },
   featuredFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: space.md },
+  featuredPoster: { width: 36, height: 54, borderRadius: radius.xs, marginRight: space.sm, backgroundColor: colors.burgundySoft },
   featuredKnown: { ...type.caption, color: colors.onDarkSoft, flex: 1, marginRight: space.sm },
   featuredReviews: { ...type.caption, color: colors.onDarkSoft, marginLeft: space.sm },
 

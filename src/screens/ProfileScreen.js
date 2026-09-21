@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Avatar, Button, HeartButton, IconButton, StatusPill, Tag } from '../components/ui';
 import { Chevron, Collapsible } from '../components/Collapsible';
 import StarRating from '../components/StarRating';
+import PosterRail from '../components/PosterRail';
 import { colors, fonts, gradients, radius, shadow, space, touch, type } from '../theme';
 import { formatBirthday, formatReviews, tenureLabel } from '../data/actressModel';
 import { useAuth } from '../auth';
@@ -282,13 +283,18 @@ export default function ProfileScreen({ actress, favorite, onBack, onFavorite, o
         ) : null}
       </Section>
 
-      <Section title="Notable Feature Films">
-        <ListRows items={actress.films} emptyText="Filmography pending." sub="Feature role" />
-      </Section>
-
-      <Section title="Notable Television Series">
-        <ListRows items={actress.tvSeries} emptyText="No television credits on record." sub="Series" />
-      </Section>
+      {actress.films.length || actress.tvSeries.length ? (
+        <View style={s.knownFor}>
+          <Text style={s.sectionTitle} accessibilityRole="header">Known For</Text>
+          <PosterRail titles={actress.films} kind="movie" label={actress.films.length ? 'Feature films' : undefined} edge={space.page} />
+          <PosterRail titles={actress.tvSeries} kind="tv" label={actress.tvSeries.length ? 'Television' : undefined} edge={space.page} />
+          <Text style={s.tmdbNote}>Posters via TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.</Text>
+        </View>
+      ) : (
+        <Section title="Known For">
+          <Text style={s.emptyRow}>Filmography pending.</Text>
+        </Section>
+      )}
 
       <Section title="Awards & Guild Honors">
         <ListRows items={actress.awards} emptyText="No formal citations on record." />
@@ -355,6 +361,8 @@ const s = StyleSheet.create({
   signInHint: { alignItems: 'center', paddingVertical: 12 },
   signInHintText: { color: colors.rose, fontSize: 12, fontFamily: fonts.sansSemi },
   section: { backgroundColor: colors.white, borderRadius: radius.lg, padding: 20, marginTop: 16, ...shadow.card },
+  knownFor: { marginTop: 24 },
+  tmdbNote: { ...type.caption, fontFamily: fonts.sans, marginTop: space.md },
   sectionTitle: { fontFamily: fonts.serif, fontSize: 22, color: colors.burgundy, marginBottom: 12 },
   body: { fontFamily: fonts.sans, fontSize: 15, lineHeight: 24, color: colors.textStrong },
   metrics: { flexDirection: 'row', marginTop: 16 },

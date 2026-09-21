@@ -12,6 +12,7 @@
  *   lib/records.php       actress field collection and age derivation
  *   lib/social.php        favorites, notifications, reviews helpers
  *   routes/*.php          one file per URL group; each ends the request when it matches
+ *   cache/                optional, writable: caches TMDB poster lookups (see routes/posters.php)
  *
  * Run schema.sql, then seed.sql, then the remaining .sql files in phpMyAdmin first.
  *
@@ -38,6 +39,7 @@
  *   PUT    pinay_actresses.php?action=notifications  (token) -> marks all read
  *   DELETE pinay_actresses.php?action=notifications  (token) -> clears the feed
  *   GET    pinay_actresses.php?action=reviews&id=N   -> {average, count, reviews[], mine}
+ *   GET    pinay_actresses.php?action=posters&kind=movie|tv&titles=A|B  -> {configured, items}  (TMDB posters)
  *   PUT    pinay_actresses.php?action=reviews&id=N   (member) {rating 1-5, comment} -> upsert own review
  *   DELETE pinay_actresses.php?action=reviews&id=N   (member: own review; admin: &review_id=M)
  *
@@ -125,5 +127,6 @@ $action  = isset($_GET['action']) ? strtolower(trim($_GET['action'])) : '';
 // Routes are plain includes that share this scope; each one ends the request when it matches.
 require __DIR__ . '/routes/reviews.php';
 require __DIR__ . '/routes/notifications.php';
+require __DIR__ . '/routes/posters.php';
 require __DIR__ . '/routes/account.php';
 require __DIR__ . '/routes/actresses.php';

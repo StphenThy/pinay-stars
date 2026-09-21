@@ -114,6 +114,11 @@ export const reviewApi = {
   remove: (id, reviewId) => request({ action: 'reviews', id, review_id: reviewId }, { method: 'DELETE' }),
 };
 
+export const posterApi = {
+  // titles: array of film / series names; kind: 'movie' | 'tv'. Returns {configured, items:{title: {...}|null}}
+  lookup: (titles, kind = 'movie') => request({ action: 'posters', kind, titles: titles.join('|') }),
+};
+
 export const notificationApi = {
   list: () => request({ action: 'notifications' }),
   add: (tone, message, actressId) =>

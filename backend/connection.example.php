@@ -12,6 +12,10 @@ $TOKEN_SECRET = 'replace-with-64-hex-characters';
 // Set to true only while debugging: API error responses then include MySQL error text.
 $API_DEBUG = false;
 
+// Optional. A free TMDB v3 API key (themoviedb.org > Settings > API) enables film and
+// TV posters on profiles. Leave empty to show plain title cards instead.
+$TMDB_API_KEY = '';
+
 class dbObj {
     private $host = 'localhost';
     private $user = 'db_user';
