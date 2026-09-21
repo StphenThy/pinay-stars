@@ -7,9 +7,11 @@ A React Native / Expo Go app for discovering and managing Pinay actresses, backe
 | Path | What it is |
 | --- | --- |
 | `App.js`, `src/`, `lib/` | Expo app |
-| `backend/pinay_actresses.php` | The whole API (actresses, auth, favorites, reviews, notifications) |
+| `backend/pinay_actresses.php` | API entry point (config, CORS, DB connection, session) |
+| `backend/lib/` | Helpers: HTTP, accounts/tokens, rate limiting, records, social |
+| `backend/routes/` | One file per URL group: reviews, notifications, account, actresses |
 | `backend/schema.sql`, `seed.sql` | Base table + sample rows |
-| `backend/*.sql` | Later migrations (`admins`, `users`, `profile`, `reviews`, `notifications`) |
+| `backend/*.sql` | Later migrations (`admins`, `users`, `profile`, `reviews`, `notifications`, `login_attempts`, `token_version`) |
 | `backend/connection.example.php` | Template for the untracked `connection.php` (DB credentials + token secret) |
 
 ## Run the app
@@ -22,8 +24,9 @@ A React Native / Expo Go app for discovering and managing Pinay actresses, backe
 ## Deploy the backend
 
 1. Copy `backend/connection.example.php` to `connection.php` on the server, fill in the MySQL credentials, and set `$TOKEN_SECRET` to a fresh value (`php -r "echo bin2hex(random_bytes(32));"`).
-2. Upload `pinay_actresses.php` next to it.
-3. In phpMyAdmin run `schema.sql`, then `seed.sql`, then the remaining `.sql` files.
+2. Upload `pinay_actresses.php` **and the `lib/` and `routes/` folders** next to it (same directory as `connection.php`).
+3. In phpMyAdmin run `schema.sql`, then `seed.sql`, then the remaining `.sql` files. The `.sql` files stay on your computer; they are never uploaded.
+4. Optional: set `$API_DEBUG = true;` in `connection.php` to see MySQL error text while debugging, and turn it off again afterwards.
 
 `connection.php` is git-ignored. Never commit real credentials or the token secret.
 
