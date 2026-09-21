@@ -25,3 +25,4 @@ Thumbs.db
 *.log
 npm-debug.*
 yarn-error.*
+deploy-backend.zip

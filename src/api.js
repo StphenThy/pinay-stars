@@ -1,8 +1,4 @@
-  // Only 401 (no valid session) is an AuthError, which signs the user out. 403 means the
-  // account is fine but lacks the role, so it surfaces as an ordinary message.
-  if (response.status === 401) {
-    throw new AuthError(body?.error || 'Sign in required.');
-  }// Public API host. The data API is the PHP endpoint below.
+// Public API host. The data API is the PHP endpoint below.
 export const API_BASE_URL = 'http://stephen123.mooo.com';
 
 const REQUEST_TIMEOUT_MS = 12000;
@@ -50,8 +46,10 @@ async function request(params, options = {}) {
   if (text) {
     try { body = JSON.parse(text); } catch { body = null; }
   }
+  // Only 401 (no valid session) is an AuthError, which signs the user out. 403 means the
+  // account is fine but lacks the role, so it surfaces as an ordinary message.
   if (response.status === 401) {
-    throw new AuthError(body?.error || 'Admin login required.');
+    throw new AuthError(body?.error || 'Sign in required.');
   }
   if (!response.ok) {
     throw new Error(body?.error || body?.status_message || `Registry error (${response.status}).`);
