@@ -15,6 +15,7 @@
  *
  *   POST   pinay_actresses.php?action=register  {username, password, display_name} -> {token, account}
  *   POST   pinay_actresses.php?action=login     {username, password} -> {token, account}   (admins and members)
+ *          Both answer 429 with Retry-After after repeated failures (see login_attempts.sql).
  *   GET    pinay_actresses.php?action=me        (token) -> account + favorite ids
  *   PUT    pinay_actresses.php?action=password  (token) {current, next}
  *   PUT    pinay_actresses.php?action=profile   (token) {username, display_name, avatar_url} -> {account}
@@ -41,6 +42,13 @@ $FAVORITES_TABLE     = 'favorites';
 $NOTIFICATIONS_TABLE = 'notifications';
 $NOTIFICATION_LIMIT  = 60;
 $REVIEWS_TABLE       = 'reviews';
+$ATTEMPTS_TABLE      = 'login_attempts';
+
+// Brute-force limits (see login_attempts.sql). Counted over the last LOGIN_WINDOW seconds.
+$LOGIN_WINDOW        = 900;   // 15 minutes
+$LOGIN_MAX_PER_IP    = 20;    // failed sign-ins from one address
+$LOGIN_MAX_PER_USER  = 8;     // failed sign-ins against one username
+$REGISTER_MAX_PER_IP = 5;     // new accounts from one address per hour
 
 // The token-signing secret lives in connection.php as $TOKEN_SECRET (see
 // connection.example.php). It is never committed. Changing it logs everyone out.
@@ -248,6 +256,46 @@ function session_payload($account, $secret, $days) {
     ];
 }
 
+// ------------------------------------------------------------ RATE LIMIT
+// Every helper here fails open: if login_attempts.sql has not been run yet, or the
+// query fails for any reason, sign-in still works and only the limit is skipped.
+
+function client_ip() {
+    // REMOTE_ADDR only. X-Forwarded-For is client-controlled and would let an attacker reset the count.
+    $ip = isset($_SERVER['REMOTE_ADDR']) ? (string) $_SERVER['REMOTE_ADDR'] : '';
+    return substr($ip, 0, 45);
+}
+
+function attempts_since($mysqli, $table, $kind, $column, $value, $seconds) {
+    $stmt = @$mysqli->prepare("SELECT COUNT(*) AS n FROM `$table` WHERE kind = ? AND `$column` = ? AND attempted_at > (NOW() - INTERVAL ? SECOND)");
+    if (!$stmt) { return 0; }
+    $stmt->bind_param('ssi', $kind, $value, $seconds);
+    if (!$stmt->execute()) { return 0; }
+    $row = $stmt->get_result()->fetch_assoc();
+    return $row ? (int) $row['n'] : 0;
+}
+
+function record_attempt($mysqli, $table, $kind, $ip, $username = '') {
+    $stmt = @$mysqli->prepare("INSERT INTO `$table` (kind, ip, username) VALUES (?, ?, ?)");
+    if (!$stmt) { return; }
+    $stmt->bind_param('sss', $kind, $ip, $username);
+    @$stmt->execute();
+    // Keep the table small; one request in twenty sweeps out yesterday's rows.
+    if (mt_rand(1, 20) === 1) { @$mysqli->query("DELETE FROM `$table` WHERE attempted_at < (NOW() - INTERVAL 1 DAY)"); }
+}
+
+function clear_attempts($mysqli, $table, $username) {
+    $stmt = @$mysqli->prepare("DELETE FROM `$table` WHERE kind = 'login' AND username = ?");
+    if (!$stmt) { return; }
+    $stmt->bind_param('s', $username);
+    @$stmt->execute();
+}
+
+function too_many($seconds) {
+    header('Retry-After: ' . $seconds);
+    fail('Too many attempts. Please wait ' . max(1, (int) ceil($seconds / 60)) . ' minutes and try again.', 429);
+}
+
 function favorite_ids($mysqli, $table, $account) {
     $stmt = $mysqli->prepare("SELECT actress_id FROM `$table` WHERE role = ? AND account_id = ? ORDER BY created_at ASC");
     $stmt->bind_param('si', $account['role'], $account['id']);
@@ -446,11 +494,14 @@ if ($action === 'register' && $method === 'POST') {
     if (account_by_username($mysqli, 'admin', $username) || account_by_username($mysqli, 'user', $username)) {
         fail('That username is already taken.', 409);
     }
+    $ip = client_ip();
+    if (attempts_since($mysqli, $ATTEMPTS_TABLE, 'register', 'ip', $ip, 3600) >= $REGISTER_MAX_PER_IP) { too_many(3600); }
 
     $hash = password_hash($password, PASSWORD_DEFAULT);
     $stmt = $mysqli->prepare("INSERT INTO `$USER_TABLE` (username, password_hash, display_name) VALUES (?, ?, ?)");
     $stmt->bind_param('sss', $username, $hash, $display);
     if (!$stmt->execute()) { fail($DEBUG ? $stmt->error : 'Could not create the account.', 500); }
+    record_attempt($mysqli, $ATTEMPTS_TABLE, 'register', $ip, $username);
 
     $created = account_by_id($mysqli, 'user', $mysqli->insert_id);
     respond(session_payload($created, $SECRET, $TOKEN_DAYS), 201);
@@ -461,14 +512,22 @@ if ($action === 'login' && $method === 'POST') {
     $username = isset($body['username']) ? strtolower(trim((string) $body['username'])) : '';
     $password = isset($body['password']) ? (string) $body['password'] : '';
 
+    $ip = client_ip();
+    if (attempts_since($mysqli, $ATTEMPTS_TABLE, 'login', 'ip', $ip, $LOGIN_WINDOW) >= $LOGIN_MAX_PER_IP
+        || ($username !== '' && attempts_since($mysqli, $ATTEMPTS_TABLE, 'login', 'username', $username, $LOGIN_WINDOW) >= $LOGIN_MAX_PER_USER)) {
+        too_many($LOGIN_WINDOW);
+    }
+
     $row = account_by_username($mysqli, 'admin', $username);
     if (!$row) { $row = account_by_username($mysqli, 'user', $username); }
 
     // Verify against a dummy hash when the user is unknown so timing does not reveal usernames.
     $hash = $row ? $row['password_hash'] : '$2y$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012345';
     if (!$row || $password === '' || !password_verify($password, $hash)) {
+        record_attempt($mysqli, $ATTEMPTS_TABLE, 'login', $ip, $username);
         fail('Incorrect username or password.', 401);
     }
+    clear_attempts($mysqli, $ATTEMPTS_TABLE, $username);
     respond(session_payload($row, $SECRET, $TOKEN_DAYS));
 }
 
