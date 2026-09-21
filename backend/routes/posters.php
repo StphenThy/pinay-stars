@@ -16,7 +16,12 @@
  * for 30 days, so each title is fetched from TMDB at most once a month. Failures never
  * break the request: an unmatched or errored title simply comes back null.
  *
- * Included by pinay_actresses.php after the session has been resolved. (v2: reports transport errors)
+ * Hosts that block outbound connections (Freehostia's shared plans do) cannot run the
+ * lookup here. Calling the route with no titles returns {configured, client_key} and the
+ * app then queries TMDB directly with that key; the v3 key is read-only, so exposing it
+ * only risks someone else using its free quota.
+ *
+ * Included by pinay_actresses.php after the session has been resolved.
  */
 
 if ($action === 'posters' && $method === 'GET') {
@@ -30,7 +35,7 @@ if ($action === 'posters' && $method === 'GET') {
 
     $configured = !empty($TMDB_API_KEY);
     if (!$configured || !$titles) {
-        respond(['configured' => $configured, 'items' => (object) []]);
+        respond(['configured' => $configured, 'client_key' => $configured ? $TMDB_API_KEY : null, 'items' => (object) []]);
     }
 
     // ---- cache
@@ -107,7 +112,8 @@ if ($action === 'posters' && $method === 'GET') {
         list($query, $year) = $split($title);
         $params = ['api_key' => $TMDB_API_KEY, 'query' => $query, 'include_adult' => 'false', 'region' => 'PH'];
         if ($year) { $params[$kind === 'tv' ? 'first_air_date_year' : 'year'] = $year; }
-        $body = $http_get('https://api.themoviedb.org/3/search/' . $kind . '?' . http_build_query($params));
+        // Explicit '&': some hosts set arg_separator.output to '&amp;', which breaks the query string.
+        $body = $http_get('https://api.themoviedb.org/3/search/' . $kind . '?' . http_build_query($params, '', '&'));
         $data = $body ? json_decode($body, true) : null;
         if ($data === null && $lastError !== '') { $errors[$title] = $lastError; }
         elseif ($data === null && $body !== null) { $errors[$title] = 'unparseable: ' . substr((string) $body, 0, 160); }

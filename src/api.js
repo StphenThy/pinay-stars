@@ -115,8 +115,8 @@ export const reviewApi = {
 };
 
 export const posterApi = {
-  // titles: array of film / series names; kind: 'movie' | 'tv'. Returns {configured, items:{title: {...}|null}}
-  lookup: (titles, kind = 'movie') => request({ action: 'posters', kind, titles: titles.join('|') }),
+  // {configured, client_key}: the read-only TMDB key the app uses to search posters itself.
+  config: () => request({ action: 'posters' }),
 };
 
 export const notificationApi = {
