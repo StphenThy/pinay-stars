@@ -125,7 +125,7 @@ export default function ManageScreen({ actresses, source, syncing, lastSync, onP
           </Pressable>
           {a.status === 'review' ? (
             <View style={s.cardActions}>
-              <Button label="✓ Approve" small onPress={() => onApprove(a)} style={{ flex: 1.3 }} />
+              <Button label="Approve" small onPress={() => onApprove(a)} style={{ flex: 1.3 }} />
               <Button label="Edit" variant="secondary" small onPress={() => onEdit(a)} style={{ flex: 1, marginLeft: 8 }} />
               <Button label="Reject" variant="danger" small onPress={() => onDelete(a)} style={{ flex: 1, marginLeft: 8 }} />
             </View>

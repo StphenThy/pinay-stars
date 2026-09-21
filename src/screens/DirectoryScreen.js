@@ -46,7 +46,7 @@ export default function DirectoryScreen({ actresses, query, setQuery, filters, s
         <Kicker>● ROSTER ARCHIVE</Kicker>
         <View style={s.headingRow}>
           <Text style={s.title}>Actress Directory</Text>
-          <View style={s.count}><Text style={s.countText}>✦ {actresses.length} Stars</Text></View>
+          <View style={s.count}><Text style={s.countText}>{actresses.length} Stars</Text></View>
         </View>
       </View>
 
@@ -65,7 +65,7 @@ export default function DirectoryScreen({ actresses, query, setQuery, filters, s
 
       <View style={s.toolbar}>
         <Pressable onPress={onOpenFilters} style={[s.filtersButton, activeCount > 0 && s.filtersButtonActive]}>
-          <Text style={[s.filtersText, activeCount > 0 && s.filtersTextActive]}>☷ Filters</Text>
+          <Text style={[s.filtersText, activeCount > 0 && s.filtersTextActive]}>Filters</Text>
           {activeCount > 0 ? <View style={s.badge}><Text style={s.badgeText}>{activeCount}</Text></View> : null}
         </Pressable>
         <Pressable onPress={cycleSort} style={s.sortButton}>

@@ -6,11 +6,11 @@ export function Kicker({ children, style }) {
   return <Text style={[s.kicker, style]}>{children}</Text>;
 }
 
-export function SectionHeader({ title, subtitle, action, onAction, icon }) {
+export function SectionHeader({ title, subtitle, action, onAction }) {
   return (
     <View style={s.sectionHeader}>
       <View style={{ flex: 1 }}>
-        <Text style={s.sectionTitle}>{icon ? `${icon} ` : ''}{title}</Text>
+        <Text style={s.sectionTitle}>{title}</Text>
         {subtitle ? <Text style={s.sectionSubtitle}>{subtitle}</Text> : null}
       </View>
       {action ? (

@@ -68,12 +68,12 @@ export default function AccountScreen({ account, favoritesCount, pendingCount, b
           <Text style={s.name}>{account.display_name || account.username}</Text>
           <Text style={s.username}>@{account.username}</Text>
           <View style={[s.badge, !isAdmin && s.badgeMember]}>
-            <Text style={[s.badgeText, !isAdmin && s.badgeTextMember]}>✦ {roleLabel(account).toUpperCase()}{isAdmin ? ' • FULL ACCESS' : ''}</Text>
+            <Text style={[s.badgeText, !isAdmin && s.badgeTextMember]}>{roleLabel(account).toUpperCase()}{isAdmin ? ' • FULL ACCESS' : ''}</Text>
           </View>
           {since ? <Text style={s.since}>Member since {since}</Text> : null}
           {!editing ? (
             <Pressable onPress={startEditing} style={s.editLink} hitSlop={8}>
-              <Text style={s.editLinkText}>✎ Edit profile</Text>
+              <Text style={s.editLinkText}>Edit profile</Text>
             </Pressable>
           ) : null}
         </View>
@@ -127,7 +127,7 @@ export default function AccountScreen({ account, favoritesCount, pendingCount, b
               <Button label="Add actress" variant="secondary" onPress={() => onNavigate('add')} style={{ flex: 1, marginLeft: 10 }} />
             </>
           ) : (
-            <Button label="✦ Suggest an Actress" onPress={() => onNavigate('suggest')} style={{ flex: 1 }} />
+            <Button label="Suggest an Actress" onPress={() => onNavigate('suggest')} style={{ flex: 1 }} />
           )}
         </View>
 

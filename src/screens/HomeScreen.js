@@ -85,7 +85,6 @@ export default function HomeScreen({ actresses, query, setQuery, category, setCa
 
       <SectionHeader
         title="Featured Spotlights"
-        icon="♨"
         subtitle={filtered ? `${pool.length} talent${pool.length === 1 ? '' : 's'} in ${category}${query.trim() ? ` matching “${query.trim()}”` : ''}` : 'Tap a card to reveal details'}
         action={featured.length > 1 ? 'Swipe to explore' : undefined}
       />

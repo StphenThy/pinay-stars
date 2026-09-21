@@ -39,6 +39,8 @@ export default function BottomNav({ active, onNavigate, favoriteCount, pendingCo
   const items = [...BASE_ITEMS, isAdmin ? MANAGE_ITEM : SUGGEST_ITEM];
   return (
     <View style={s.bar}>
+      {/* Extends the bar colour down into the home-indicator safe area so no background shows beneath the tabs. */}
+      <View style={s.insetFill} />
       {items.map(item => (
         <Tab
           key={item.key}
@@ -69,6 +71,7 @@ const s = StyleSheet.create({
     shadowOffset: { width: 0, height: -4 },
     elevation: 8,
   },
+  insetFill: { position: 'absolute', top: '100%', left: 0, right: 0, height: 60, backgroundColor: '#FFFDFC' },
   item: { alignItems: 'center', minWidth: 72, paddingVertical: 2 },
   iconPill: { width: 56, height: 34, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
   label: { fontSize: 11, fontWeight: '600', color: '#7A6A6D', marginTop: 3, letterSpacing: 0.2 },

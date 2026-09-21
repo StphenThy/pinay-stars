@@ -13,12 +13,12 @@ export default function FavoritesScreen({ favorites, onProfile, onFavorite, onNa
       <AppHeader section="FAVORITES" />
 
       <View style={s.heading}>
-        <Text style={s.title}>★ My Favorites</Text>
+        <Text style={s.title}>My Favorites</Text>
         <View style={s.count}><Text style={s.countText}>{favorites.length} Bookmarked</Text></View>
       </View>
       <Text style={s.copy}>Quick-access list of your shortlisted and favorite Filipina performers.</Text>
       {account ? (
-        <Text style={s.syncNote}>☁ Synced to {account.display_name || account.username}'s account</Text>
+        <Text style={s.syncNote}>Synced to {account.display_name || account.username}'s account</Text>
       ) : (
         <Pressable onPress={openAccount} style={s.guestNote}>
           <Text style={s.guestNoteText}>Saved on this device only. <Text style={s.guestNoteLink}>Sign in</Text> to keep them across devices.</Text>

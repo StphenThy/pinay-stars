@@ -51,7 +51,7 @@ export default function LoginScreen({ busy, error, onLogin, onRegister, onBack, 
             <Pressable onPress={onBack} hitSlop={12} style={s.backButton}>
               <Text style={s.backText}>‹ Back</Text>
             </Pressable>
-            <Text style={s.topKicker}>✦ PINAY STARS</Text>
+            <Text style={s.topKicker}>PINAY STARS</Text>
             <View style={{ width: 70 }} />
           </View>
           {!compact ? <View style={s.logo}><Image source={require('../../assets/logo.png')} style={s.logoImage} resizeMode="contain" /></View> : null}

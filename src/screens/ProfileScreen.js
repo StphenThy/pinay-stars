@@ -61,7 +61,7 @@ function ReviewsSection({ actress, onRatingChange, onSignIn, onError }) {
 
   return (
     <View style={s.section}>
-      <Text style={s.sectionTitle}>★ Ratings & Reviews</Text>
+      <Text style={s.sectionTitle}>Ratings & Reviews</Text>
 
       <View style={s.ratingSummary}>
         <Text style={s.ratingBig}>{count ? average.toFixed(1) : '–'}</Text>
@@ -140,10 +140,10 @@ function ReviewsSection({ actress, onRatingChange, onSignIn, onError }) {
   );
 }
 
-function Section({ title, icon, children }) {
+function Section({ title, children }) {
   return (
     <View style={s.section}>
-      <Text style={s.sectionTitle}>{icon} {title}</Text>
+      <Text style={s.sectionTitle}>{title}</Text>
       {children}
     </View>
   );
@@ -239,7 +239,7 @@ export default function ProfileScreen({ actress, favorite, onBack, onFavorite, o
           <Text style={s.pendingTitle}>Pending submission</Text>
           <Text style={s.pendingBody}>Suggested by a visitor. Approve to publish her to the public directory, or reject to delete the submission.</Text>
           <View style={s.actions}>
-            <Button label="✓ Approve & Publish" onPress={() => onApprove(actress)} style={{ flex: 1 }} />
+            <Button label="Approve & Publish" onPress={() => onApprove(actress)} style={{ flex: 1 }} />
             <Button label="Reject" variant="danger" onPress={() => onDelete(actress)} style={{ flex: 1, marginLeft: 10 }} />
           </View>
         </View>
@@ -247,10 +247,10 @@ export default function ProfileScreen({ actress, favorite, onBack, onFavorite, o
 
       <View style={s.actions}>
         {isAdmin ? (
-          <Button label="✎ Edit Record" onPress={() => onEdit(actress)} style={{ flex: 1 }} />
+          <Button label="Edit Record" onPress={() => onEdit(actress)} style={{ flex: 1 }} />
         ) : null}
         <Button
-          label={favorite ? '♥ Favorited' : '♡ Favorite'}
+          label={favorite ? 'Favorited' : 'Favorite'}
           variant={isAdmin ? 'secondary' : 'primary'}
           onPress={() => onFavorite(actress)}
           style={{ flex: 1, marginLeft: isAdmin ? 10 : 0 }}
@@ -258,11 +258,11 @@ export default function ProfileScreen({ actress, favorite, onBack, onFavorite, o
       </View>
       {!isAdmin ? (
         <Pressable onPress={onSignIn} style={s.signInHint}>
-          <Text style={s.signInHintText}>🔒 Sign in as an administrator to edit or delete this record</Text>
+          <Text style={s.signInHintText}>Sign in as an administrator to edit or delete this record</Text>
         </Pressable>
       ) : null}
 
-      <Section title="Biography" icon="▤">
+      <Section title="Biography">
         <Text style={s.body}>{actress.biography || 'No biography on record yet. Tap Edit Record to add one.'}</Text>
         <View style={s.metrics}>
           <Metric value={`${actress.films.length}`} label="Feature Films" />
@@ -273,7 +273,7 @@ export default function ProfileScreen({ actress, favorite, onBack, onFavorite, o
 
       {!pending ? <ReviewsSection actress={actress} onRatingChange={onRatingChange} onSignIn={onSignIn} onError={onError} /> : null}
 
-      <Section title="Acting Genres & Style" icon="▣">
+      <Section title="Acting Genres & Style">
         <View style={s.tags}>
           {actress.genres.length ? actress.genres.map(g => <Tag key={g} label={g} />) : <Text style={s.emptyRow}>No genres tagged.</Text>}
         </View>
@@ -285,15 +285,15 @@ export default function ProfileScreen({ actress, favorite, onBack, onFavorite, o
         ) : null}
       </Section>
 
-      <Section title="Notable Feature Films" icon="▣">
+      <Section title="Notable Feature Films">
         <ListRows items={actress.films} emptyText="Filmography pending." sub="Feature role" />
       </Section>
 
-      <Section title="Notable Television Series" icon="▣">
+      <Section title="Notable Television Series">
         <ListRows items={actress.tvSeries} emptyText="No television credits on record." sub="Series" />
       </Section>
 
-      <Section title="Awards & Guild Honors" icon="✦">
+      <Section title="Awards & Guild Honors">
         <ListRows items={actress.awards} emptyText="No formal citations on record." />
       </Section>
 

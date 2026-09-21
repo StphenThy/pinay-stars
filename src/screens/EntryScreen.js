@@ -26,7 +26,7 @@ function RoleCard({ icon, title, body, bullets, cta, onPress, primary, delay }) 
         <Text style={[s.cardBody, primary && s.cardBodyPrimary]}>{body}</Text>
         <View style={s.bullets}>
           {bullets.map(b => (
-            <Text key={b} style={[s.bullet, primary && s.bulletPrimary]}>✓  {b}</Text>
+            <Text key={b} style={[s.bullet, primary && s.bulletPrimary]}>{b}</Text>
           ))}
         </View>
         <View style={[s.cta, primary && s.ctaPrimary]}>
@@ -42,7 +42,7 @@ export default function EntryScreen({ onSignIn, onRegister, onGuest }) {
     <LinearGradient colors={['#4A0015', '#730025', '#3B0012']} locations={[0, 0.55, 1]} style={s.page}>
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
       <View style={s.head}>
-        <Text style={s.kicker}>✦ CHOOSE HOW TO ENTER</Text>
+        <Text style={s.kicker}>CHOOSE HOW TO ENTER</Text>
         <Text style={s.title}>Welcome to the Archive</Text>
         <Text style={s.sub}>Create a free account to keep your favorites, or browse as a guest.</Text>
       </View>

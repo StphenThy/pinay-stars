@@ -84,7 +84,7 @@ export default function IntroScreen({ ready, source, actresses = [], onStart }) 
   return (
     <LinearGradient colors={['#4A0015', '#730025', '#3B0012']} locations={[0, 0.55, 1]} style={s.page}>
       <View style={s.archive}>
-        <Text style={s.archiveText}>✦ NATIONAL ARCHIVE • CASTING DOSSIER</Text>
+        <Text style={s.archiveText}>NATIONAL ARCHIVE • CASTING DOSSIER</Text>
       </View>
 
       <View style={s.center}>
@@ -140,7 +140,7 @@ export default function IntroScreen({ ready, source, actresses = [], onStart }) 
           onPressOut={() => Animated.spring(pressScale, { toValue: 1, useNativeDriver: true }).start()}
           style={[s.button, !ready && s.buttonDisabled]}
         >
-          <Text style={s.buttonText}>✦ DISCOVER ACTRESSES →</Text>
+          <Text style={s.buttonText}>DISCOVER ACTRESSES</Text>
         </Pressable>
       </Animated.View>
 

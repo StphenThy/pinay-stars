@@ -25,7 +25,7 @@ function FeaturedCard({ actress, featureLabel, favorite, onOpen, onToggle }) {
       <ImageBackground source={{ uri: actress.image }} imageStyle={s.featuredImage} style={s.featuredBg}>
         <Pressable onPress={onOpen} style={StyleSheet.absoluteFill} />
         <View style={s.featuredTop} pointerEvents="box-none">
-          <Text style={s.featuredBadge}>✪ {featureLabel || actress.badge}</Text>
+          <Text style={s.featuredBadge}>{featureLabel || actress.badge}</Text>
           <Heart favorite={favorite} onPress={onToggle} light />
         </View>
         <LinearGradient
