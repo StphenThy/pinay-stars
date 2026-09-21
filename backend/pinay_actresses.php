@@ -32,9 +32,6 @@
  * Signed-in requests carry the token as "Authorization: Bearer <token>" and also
  * "X-Auth-Token: <token>", because some shared hosts strip Authorization.
  * Token format: role.id.expiry.signature — admins in `admins`, members in `users`.
- *
- * Shared hosts sometimes block PUT/DELETE. If yours does, the app can send
- * POST with ?_method=PUT or ?_method=DELETE and this file honours it.
  */
 
 $TABLE               = 'pinay_actresses';
@@ -49,7 +46,8 @@ $REVIEWS_TABLE       = 'reviews';
 // connection.example.php). It is never committed. Changing it logs everyone out.
 $TOKEN_DAYS   = 30;
 
-// Set to true only while debugging; it exposes MySQL error text.
+// Exposes MySQL error text in responses. Set $API_DEBUG = true in connection.php while
+// debugging; it lives there so a debug build can never be committed by accident.
 $DEBUG = false;
 
 header('Content-Type: application/json; charset=utf-8');
@@ -63,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once 'connection.php';
+$DEBUG = !empty($API_DEBUG);
 
 function respond($payload, $code = 200) {
     http_response_code($code);
@@ -153,11 +152,14 @@ function collect($body, $fields, $statuses) {
 }
 
 $method = strtoupper($_SERVER['REQUEST_METHOD']);
-if ($method === 'POST' && !empty($_GET['_method'])) {
-    $override = strtoupper($_GET['_method']);
-    if (in_array($override, ['PUT', 'DELETE'], true)) {
-        $method = $override;
-    }
+
+/**
+ * Notification text is shown verbatim in other people's feeds, so anything a member typed
+ * (display names, stage names) is stripped of control characters and kept short.
+ */
+function clean_text($value, $max) {
+    $value = preg_replace('/[\x00-\x1F\x7F]+/u', ' ', (string) $value);
+    return mb_substr(trim($value), 0, $max);
 }
 
 // ------------------------------------------------------------------ AUTH
@@ -409,7 +411,7 @@ if ($action === 'notifications') {
     if ($method === 'POST') {
         $body    = json_body();
         $tone    = in_array($body['tone'] ?? '', ['success', 'error', 'info'], true) ? $body['tone'] : 'info';
-        $message = mb_substr(trim((string) ($body['message'] ?? '')), 0, 255);
+        $message = clean_text($body['message'] ?? '', 255);
         if ($message === '') { fail('A message is required.', 422); }
         $actressId = isset($body['actress_id']) && $body['actress_id'] !== null && $body['actress_id'] !== '' ? (int) $body['actress_id'] : null;
         notify($mysqli, $NOTIFICATIONS_TABLE, $account['role'], $account['id'], $tone, $message, $actressId);
@@ -633,8 +635,8 @@ if ($method === 'POST') {
     $created = $read->get_result()->fetch_assoc();
 
     if (!$isAdmin) {
-        $who   = $isUser ? $account['display_name'] : 'a visitor';
-        $label = $created['stage_name'] ?: $created['name'];
+        $who   = $isUser ? clean_text($account['display_name'], 40) : 'a visitor';
+        $label = clean_text($created['stage_name'] ?: $created['name'], 80);
         notify_admins($mysqli, $NOTIFICATIONS_TABLE, $ADMIN_TABLE, 'info', "New suggestion from $who: \"$label\" is awaiting review", (int) $newId);
     }
     respond($created, 201);
@@ -697,7 +699,7 @@ if ($method === 'PUT') {
     }
 
     if ($before['status'] === 'review' && $row['status'] !== 'review' && $before['submitted_by']) {
-        $label = $row['stage_name'] ?: $row['name'];
+        $label = clean_text($row['stage_name'] ?: $row['name'], 80);
         notify($mysqli, $NOTIFICATIONS_TABLE, 'user', (int) $before['submitted_by'], 'success', "Your suggestion \"$label\" was approved and is now live in the directory", (int) $id);
     }
     respond($row);
@@ -726,7 +728,7 @@ if ($method === 'DELETE') {
     }
 
     if ($before && $before['status'] === 'review' && $before['submitted_by']) {
-        $label = $before['stage_name'] ?: $before['name'];
+        $label = clean_text($before['stage_name'] ?: $before['name'], 80);
         notify($mysqli, $NOTIFICATIONS_TABLE, 'user', (int) $before['submitted_by'], 'error', "Your suggestion \"$label\" was not approved by the administrators");
     }
     respond(['deleted' => $id]);

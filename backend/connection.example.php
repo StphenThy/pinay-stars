@@ -9,6 +9,9 @@
 // Signs login tokens. Changing it logs every admin and member out.
 $TOKEN_SECRET = 'replace-with-64-hex-characters';
 
+// Set to true only while debugging: API error responses then include MySQL error text.
+$API_DEBUG = false;
+
 class dbObj {
     private $host = 'localhost';
     private $user = 'db_user';
