@@ -50,16 +50,32 @@ if ($action === 'posters' && $method === 'GET') {
         return [trim($title), $year];
     };
 
-    $http_get = function ($url) {
+    // Shared hosts often lack a usable CA bundle, so TLS verification uses the Mozilla
+    // bundle shipped in lib/cacert.pem when present. Any transport error is reported back
+    // in the response's "errors" map (no secrets in it) to make hosting problems visible.
+    $caFile = __DIR__ . '/../lib/cacert.pem';
+    $lastError = '';
+    $http_get = function ($url) use ($caFile, &$lastError) {
+        $lastError = '';
         if (function_exists('curl_init')) {
             $ch = curl_init($url);
-            curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 6, CURLOPT_CONNECTTIMEOUT => 4, CURLOPT_FOLLOWLOCATION => true]);
+            $opts = [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 8, CURLOPT_CONNECTTIMEOUT => 5, CURLOPT_FOLLOWLOCATION => true];
+            if (is_file($caFile)) { $opts[CURLOPT_CAINFO] = $caFile; }
+            curl_setopt_array($ch, $opts);
             $body = curl_exec($ch);
+            if ($body === false) { $lastError = 'curl: ' . curl_error($ch); }
+            $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
+            if ($body !== false && $code >= 400) { $lastError = "tmdb http $code"; return null; }
             return $body === false ? null : $body;
         }
-        $ctx = stream_context_create(['http' => ['timeout' => 6]]);
+        $ssl = is_file($caFile) ? ['cafile' => $caFile] : [];
+        $ctx = stream_context_create(['http' => ['timeout' => 8], 'ssl' => $ssl]);
         $body = @file_get_contents($url, false, $ctx);
+        if ($body === false) {
+            $e = error_get_last();
+            $lastError = 'fopen: ' . ($e ? $e['message'] : 'unknown error');
+        }
         return $body === false ? null : $body;
     };
 
@@ -75,7 +91,8 @@ if ($action === 'posters' && $method === 'GET') {
         return $best;
     };
 
-    $items = [];
+    $items  = [];
+    $errors = [];
     foreach ($titles as $title) {
         $key = $kind . ':' . mb_strtolower($title);
         if (isset($cache[$key]) && isset($cache[$key]['t']) && time() - $cache[$key]['t'] < $POSTER_TTL) {
@@ -88,6 +105,7 @@ if ($action === 'posters' && $method === 'GET') {
         if ($year) { $params[$kind === 'tv' ? 'first_air_date_year' : 'year'] = $year; }
         $body = $http_get('https://api.themoviedb.org/3/search/' . $kind . '?' . http_build_query($params));
         $data = $body ? json_decode($body, true) : null;
+        if ($data === null && $lastError !== '') { $errors[$title] = $lastError; }
 
         $value = null;
         if (is_array($data) && !empty($data['results'])) {
@@ -112,5 +130,7 @@ if ($action === 'posters' && $method === 'GET') {
     }
 
     if ($dirty) { @file_put_contents($cacheFile, json_encode($cache), LOCK_EX); }
-    respond(['configured' => true, 'items' => (object) $items]);
+    $out = ['configured' => true, 'items' => (object) $items];
+    if ($errors) { $out['errors'] = (object) $errors; }
+    respond($out);
 }
