@@ -22,11 +22,11 @@ import Toast from './src/components/Toast';
 import DeleteDialog from './src/components/DeleteDialog';
 import { NotificationContext } from './src/notifications';
 import { AuthContext } from './src/auth';
+import { clearSession, loadSession, patchSession, saveSession } from './src/session';
 import { haptic } from './src/haptics';
 
 const FAVORITES_KEY = 'pinay-stars:favorites';
 const NOTIFICATIONS_KEY = 'pinay-stars:notifications';
-const AUTH_KEY = 'pinay-stars:auth';
 const NOTIFICATION_LIMIT = 50;
 const TABS = ['home', 'directory', 'favorites', 'manage'];
 
@@ -145,7 +145,7 @@ export default function App() {
     setAuthToken('');
     setAccount(null);
     accountRef.current = null;
-    AsyncStorage.removeItem(AUTH_KEY).catch(() => {});
+    clearSession();
     setFavoriteIds(await loadDeviceFavorites());
     setNotifications(await loadGuestNotifications());
     setStack(st => (st.some(f => ['manage', 'form', 'account'].includes(f.name)) ? [{ name: 'home' }] : st));
@@ -158,9 +158,8 @@ export default function App() {
     (async () => {
       let favorites = await loadDeviceFavorites();
       try {
-        const raw = await AsyncStorage.getItem(AUTH_KEY);
-        if (raw) {
-          const saved = JSON.parse(raw);
+        const saved = await loadSession();
+        if (saved) {
           setAuthToken(saved.token);
           try {
             const me = await authApi.me();
@@ -172,7 +171,7 @@ export default function App() {
           } catch (err) {
             if (err instanceof AuthError) {
               setAuthToken('');
-              AsyncStorage.removeItem(AUTH_KEY).catch(() => {});
+              clearSession();
             } else if (!cancelled) {
               // Offline: trust the saved session until the server can be asked again.
               setAccount(saved.account);
@@ -193,9 +192,7 @@ export default function App() {
   const persistFavorites = useCallback((next, currentAccount) => {
     if (currentAccount) {
       authApi.setFavorites(next.map(Number)).catch(() => {});
-      AsyncStorage.getItem(AUTH_KEY).then(raw => {
-        if (raw) AsyncStorage.setItem(AUTH_KEY, JSON.stringify({ ...JSON.parse(raw), favorites: next })).catch(() => {});
-      }).catch(() => {});
+      patchSession({ favorites: next });
     } else {
       AsyncStorage.setItem(FAVORITES_KEY, JSON.stringify(next)).catch(() => {});
     }
@@ -252,7 +249,7 @@ export default function App() {
     } catch {}
     setFavoriteIds(favorites);
     await refreshNotifications();
-    AsyncStorage.setItem(AUTH_KEY, JSON.stringify({ token: result.token, account: result.account, favorites })).catch(() => {});
+    saveSession({ token: result.token, account: result.account, favorites });
     showToast('success', greeting);
     setStack([{ name: 'home' }]);
     load({ silent: true });
@@ -297,9 +294,7 @@ export default function App() {
       const result = await authApi.updateProfile(profile);
       setAccount(result.account);
       accountRef.current = result.account;
-      AsyncStorage.getItem(AUTH_KEY).then(raw => {
-        if (raw) AsyncStorage.setItem(AUTH_KEY, JSON.stringify({ ...JSON.parse(raw), account: result.account })).catch(() => {});
-      }).catch(() => {});
+      patchSession({ account: result.account });
       showToast('success', 'Profile updated');
       onDone && onDone();
     } catch (err) {
@@ -314,7 +309,7 @@ export default function App() {
     try {
       const result = await authApi.changePassword(current, next);
       setAuthToken(result.token);
-      AsyncStorage.setItem(AUTH_KEY, JSON.stringify({ token: result.token, account: result.account, favorites: favoriteIds })).catch(() => {});
+      saveSession({ token: result.token, account: result.account, favorites: favoriteIds });
       showToast('success', 'Password updated — other devices were signed out');
       onDone && onDone();
     } catch (err) {

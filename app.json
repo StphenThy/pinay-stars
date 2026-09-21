@@ -24,6 +24,9 @@
       "shortName": "Pinay Stars",
       "themeColor": "#65001D",
       "backgroundColor": "#FFF9F8"
-    }
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
   }
 }
