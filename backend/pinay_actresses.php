@@ -16,7 +16,8 @@
  *   POST   pinay_actresses.php?action=register  {username, password, display_name} -> {token, account}
  *   POST   pinay_actresses.php?action=login     {username, password} -> {token, account}   (admins and members)
  *          Both answer 429 with Retry-After after repeated failures (see login_attempts.sql).
- *   GET    pinay_actresses.php?action=me        (token) -> account + favorite ids
+ *   GET    pinay_actresses.php?action=me        (token) -> account + favorite ids (+ session when the token is renewed)
+ *   POST   pinay_actresses.php?action=logout    (token) -> {revoked}; invalidates every token for the account
  *   PUT    pinay_actresses.php?action=password  (token) {current, next}
  *   PUT    pinay_actresses.php?action=profile   (token) {username, display_name, avatar_url} -> {account}
  *   GET    pinay_actresses.php?action=favorites (token) -> {ids}
@@ -33,6 +34,8 @@
  * Signed-in requests carry the token as "Authorization: Bearer <token>" and also
  * "X-Auth-Token: <token>", because some shared hosts strip Authorization.
  * Token format: role.id.expiry.signature — admins in `admins`, members in `users`.
+ * The signature covers the password hash and token_version, so changing the password
+ * or signing out revokes all earlier tokens. Admin tokens last 7 days, member tokens 30.
  */
 
 $TABLE               = 'pinay_actresses';
@@ -52,7 +55,10 @@ $REGISTER_MAX_PER_IP = 5;     // new accounts from one address per hour
 
 // The token-signing secret lives in connection.php as $TOKEN_SECRET (see
 // connection.example.php). It is never committed. Changing it logs everyone out.
-$TOKEN_DAYS   = 30;
+// Admin tokens are short-lived because they can edit and delete; the app renews
+// them silently on every ?action=me call when less than half the life is left.
+$TOKEN_DAYS       = 30;
+$ADMIN_TOKEN_DAYS = 7;
 
 // Exposes MySQL error text in responses. Set $API_DEBUG = true in connection.php while
 // debugging; it lives there so a debug build can never be committed by accident.
@@ -200,7 +206,7 @@ function account_table($role) {
 
 function account_by_id($mysqli, $role, $id) {
     $table = account_table($role);
-    $stmt  = $mysqli->prepare("SELECT id, username, password_hash, display_name, avatar_url, created_at FROM `$table` WHERE id = ? LIMIT 1");
+    $stmt  = $mysqli->prepare("SELECT * FROM `$table` WHERE id = ? LIMIT 1");
     $stmt->bind_param('i', $id);
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
@@ -210,7 +216,7 @@ function account_by_id($mysqli, $role, $id) {
 
 function account_by_username($mysqli, $role, $username) {
     $table = account_table($role);
-    $stmt  = $mysqli->prepare("SELECT id, username, password_hash, display_name, avatar_url, created_at FROM `$table` WHERE username = ? LIMIT 1");
+    $stmt  = $mysqli->prepare("SELECT * FROM `$table` WHERE username = ? LIMIT 1");
     $stmt->bind_param('s', $username);
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
@@ -218,9 +224,14 @@ function account_by_username($mysqli, $role, $username) {
     return $row;
 }
 
-function sign_token($role, $id, $expires, $secret, $hash) {
-    $payload = $role . '.' . $id . '.' . $expires;
-    return $payload . '.' . hash_hmac('sha256', $payload, $secret . $hash);
+/**
+ * The signing key mixes in the password hash and the account's token_version, so a
+ * password change or a sign-out (which bumps the version) invalidates every earlier token.
+ */
+function sign_token($account, $expires, $secret) {
+    $payload = $account['role'] . '.' . $account['id'] . '.' . $expires;
+    $version = isset($account['token_version']) ? (int) $account['token_version'] : 0;
+    return $payload . '.' . hash_hmac('sha256', $payload, $secret . $account['password_hash'] . '.' . $version);
 }
 
 /** Returns the account row (with role) for a valid token, or null. */
@@ -232,7 +243,7 @@ function current_account($mysqli, $secret) {
     if (!ctype_digit($id) || !ctype_digit($expires) || (int) $expires < time()) { return null; }
     $account = account_by_id($mysqli, $role, (int) $id);
     if (!$account) { return null; }
-    $expected = sign_token($role, $account['id'], $expires, $secret, $account['password_hash']);
+    $expected = sign_token($account, $expires, $secret);
     return hash_equals($expected, $token) ? $account : null;
 }
 
@@ -250,7 +261,7 @@ function public_account($account) {
 function session_payload($account, $secret, $days) {
     $expires = time() + $days * 86400;
     return [
-        'token'      => sign_token($account['role'], $account['id'], $expires, $secret, $account['password_hash']),
+        'token'      => sign_token($account, $expires, $secret),
         'expires_at' => date('c', $expires),
         'account'    => public_account($account),
     ];
@@ -294,6 +305,20 @@ function clear_attempts($mysqli, $table, $username) {
 function too_many($seconds) {
     header('Retry-After: ' . $seconds);
     fail('Too many attempts. Please wait ' . max(1, (int) ceil($seconds / 60)) . ' minutes and try again.', 429);
+}
+
+function token_days($account) {
+    global $TOKEN_DAYS, $ADMIN_TOKEN_DAYS;
+    return $account['role'] === 'admin' ? $ADMIN_TOKEN_DAYS : $TOKEN_DAYS;
+}
+
+/** Bumps token_version so every token issued so far for this account stops validating. */
+function revoke_tokens($mysqli, $account) {
+    $table = account_table($account['role']);
+    $stmt  = @$mysqli->prepare("UPDATE `$table` SET token_version = token_version + 1 WHERE id = ?");
+    if (!$stmt) { return false; } // column missing: token_version.sql not run yet
+    $stmt->bind_param('i', $account['id']);
+    return (bool) @$stmt->execute();
 }
 
 function favorite_ids($mysqli, $table, $account) {
@@ -504,7 +529,7 @@ if ($action === 'register' && $method === 'POST') {
     record_attempt($mysqli, $ATTEMPTS_TABLE, 'register', $ip, $username);
 
     $created = account_by_id($mysqli, 'user', $mysqli->insert_id);
-    respond(session_payload($created, $SECRET, $TOKEN_DAYS), 201);
+    respond(session_payload($created, $SECRET, token_days($created)), 201);
 }
 
 if ($action === 'login' && $method === 'POST') {
@@ -528,14 +553,25 @@ if ($action === 'login' && $method === 'POST') {
         fail('Incorrect username or password.', 401);
     }
     clear_attempts($mysqli, $ATTEMPTS_TABLE, $username);
-    respond(session_payload($row, $SECRET, $TOKEN_DAYS));
+    respond(session_payload($row, $SECRET, token_days($row)));
 }
 
 if ($action === 'me' && $method === 'GET') {
     if (!$account) { fail('Sign in required.', 401); }
     $me = public_account($account);
     $me['favorites'] = favorite_ids($mysqli, $FAVORITES_TABLE, $account);
+    // Renew a token that has used up more than half its life so active users never hit expiry.
+    list(, , $expires) = explode('.', bearer_token());
+    if ((int) $expires - time() < token_days($account) * 86400 / 2) {
+        $me['session'] = session_payload($account, $SECRET, token_days($account));
+    }
     respond($me);
+}
+
+// Signs the account out everywhere: the token_version bump invalidates every issued token.
+if ($action === 'logout' && $method === 'POST') {
+    if (!$account) { respond(['revoked' => false]); }
+    respond(['revoked' => revoke_tokens($mysqli, $account)]);
 }
 
 if ($action === 'password' && $method === 'PUT') {
@@ -553,7 +589,7 @@ if ($action === 'password' && $method === 'PUT') {
     if (!$stmt->execute()) { fail('Could not update the password.', 500); }
 
     $account['password_hash'] = $newHash;
-    respond(session_payload($account, $SECRET, $TOKEN_DAYS));
+    respond(session_payload($account, $SECRET, token_days($account)));
 }
 
 if ($action === 'profile' && $method === 'PUT') {

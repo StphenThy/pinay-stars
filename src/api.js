@@ -72,6 +72,8 @@ export const authApi = {
     request({ action: 'register' }, { method: 'POST', body: JSON.stringify({ username, password, display_name: displayName }) }),
   login: (username, password) => request({ action: 'login' }, { method: 'POST', body: JSON.stringify({ username, password }) }),
   me: () => request({ action: 'me' }),
+  // Invalidates every token for the account on the server (all devices).
+  logout: () => request({ action: 'logout' }, { method: 'POST' }),
   changePassword: (current, next) => request({ action: 'password' }, { method: 'PUT', body: JSON.stringify({ current, next }) }),
   updateProfile: profile => request({ action: 'profile' }, { method: 'PUT', body: JSON.stringify(profile) }),
   getFavorites: () => request({ action: 'favorites' }),

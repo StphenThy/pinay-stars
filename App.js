@@ -164,9 +164,14 @@ export default function App() {
           try {
             const me = await authApi.me();
             if (!cancelled) {
-              setAccount(me);
-              accountRef.current = me;
-              favorites = (me.favorites || []).map(String);
+              // The server hands back a fresh token once the old one has used half its life.
+              const token = me.session?.token || saved.token;
+              setAuthToken(token);
+              const { session, favorites: serverFavorites, ...profile } = me;
+              setAccount(profile);
+              accountRef.current = profile;
+              favorites = (serverFavorites || []).map(String);
+              if (session) saveSession({ token, account: profile, favorites });
             }
           } catch (err) {
             if (err instanceof AuthError) {
@@ -282,6 +287,8 @@ export default function App() {
   };
 
   const logout = async () => {
+    // Best effort: revoke the token server-side so it stops working everywhere, then clear locally.
+    try { await authApi.logout(); } catch {}
     await signOut('Signed out');
     setEntered(false);
     setStack([{ name: 'home' }, { name: 'login', params: { mode: 'login' } }]);
