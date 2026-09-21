@@ -8,6 +8,7 @@
  *
  *   GET    pinay_actresses.php              list (public: live records only; admin: everything)
  *   GET    pinay_actresses.php?name=kath    search by name / stage name
+ *          Add ?limit=50&offset=0 to either for a page: {items, total, offset, limit}
  *   GET    pinay_actresses.php?id=1         fetch one
  *   POST   pinay_actresses.php              create   (public submissions are forced to status "review")
  *   PUT    pinay_actresses.php?id=1         update   (admin only)
@@ -44,6 +45,7 @@ $USER_TABLE          = 'users';
 $FAVORITES_TABLE     = 'favorites';
 $NOTIFICATIONS_TABLE = 'notifications';
 $NOTIFICATION_LIMIT  = 60;
+$PAGE_MAX            = 200;  // largest ?limit a list request may ask for
 $REVIEWS_TABLE       = 'reviews';
 $ATTEMPTS_TABLE      = 'login_attempts';
 
@@ -672,22 +674,54 @@ if ($method === 'GET') {
         $where = 'id = ?' . ($visibility ? " AND $visibility" : '');
         $stmt  = $mysqli->prepare("SELECT * FROM `$TABLE` WHERE $where LIMIT 1");
         $stmt->bind_param('i', $id);
-    } elseif (isset($_GET['name']) && trim($_GET['name']) !== '') {
-        $like  = '%' . trim($_GET['name']) . '%';
-        $where = '(name LIKE ? OR stage_name LIKE ?)' . ($visibility ? " AND $visibility" : '');
-        $stmt  = $mysqli->prepare("SELECT * FROM `$TABLE` WHERE $where ORDER BY name ASC");
-        $stmt->bind_param('ss', $like, $like);
-    } else {
-        $where = $visibility ? "WHERE $visibility" : '';
-        $stmt  = $mysqli->prepare("SELECT * FROM `$TABLE` $where ORDER BY name ASC");
+        if (!$stmt || !$stmt->execute()) {
+            fail($DEBUG ? $mysqli->error : 'Could not read records.', 500);
+        }
+        respond($stmt->get_result()->fetch_assoc());
     }
 
+    // List / search. Without ?limit the whole result comes back as a plain array (the
+    // original contract). With ?limit=N[&offset=M] it comes back as a page:
+    //   {items: [...], total: 123, offset: M, limit: N}
+    $conditions = [];
+    $types      = '';
+    $params     = [];
+    if ($visibility) { $conditions[] = $visibility; }
+    if (isset($_GET['name']) && trim($_GET['name']) !== '') {
+        $like         = '%' . trim($_GET['name']) . '%';
+        $conditions[] = '(name LIKE ? OR stage_name LIKE ?)';
+        $types       .= 'ss';
+        $params[]     = $like;
+        $params[]     = $like;
+    }
+    $where = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
+
+    $paged  = isset($_GET['limit']) && ctype_digit((string) $_GET['limit']);
+    $limit  = $paged ? max(1, min((int) $_GET['limit'], $PAGE_MAX)) : 0;
+    $offset = $paged && isset($_GET['offset']) && ctype_digit((string) $_GET['offset']) ? (int) $_GET['offset'] : 0;
+
+    $sql = "SELECT * FROM `$TABLE` $where ORDER BY name ASC" . ($paged ? ' LIMIT ? OFFSET ?' : '');
+    $stmt = $mysqli->prepare($sql);
+    if ($stmt && $paged) {
+        $types   .= 'ii';
+        $params[] = $limit;
+        $params[] = $offset;
+    }
+    if ($stmt && $types !== '') { $stmt->bind_param($types, ...$params); }
     if (!$stmt || !$stmt->execute()) {
         fail($DEBUG ? $mysqli->error : 'Could not read records.', 500);
     }
-
     $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    respond($id > 0 ? (count($rows) ? $rows[0] : null) : $rows);
+    if (!$paged) { respond($rows); }
+
+    $count = $mysqli->prepare("SELECT COUNT(*) AS total FROM `$TABLE` $where");
+    if ($count && strlen($types) > 2) {
+        $countTypes  = substr($types, 0, -2);
+        $countParams = array_slice($params, 0, -2);
+        $count->bind_param($countTypes, ...$countParams);
+    }
+    $total = $count && $count->execute() ? (int) $count->get_result()->fetch_assoc()['total'] : count($rows) + $offset;
+    respond(['items' => $rows, 'total' => $total, 'offset' => $offset, 'limit' => $limit]);
 }
 
 // ---------------------------------------------------------------- CREATE

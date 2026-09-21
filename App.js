@@ -119,7 +119,8 @@ export default function App() {
   const load = useCallback(async ({ silent } = {}) => {
     setSyncing(true);
     try {
-      const data = await actressApi.getAll();
+      // Each page is shown as it arrives; the first one clears the loading state.
+      const data = await actressApi.getAll('', partial => { setRows(partial); setReady(true); });
       setRows(Array.isArray(data) ? data : []);
       setSource('online');
       setLoadError('');

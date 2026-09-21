@@ -59,8 +59,37 @@ async function request(params, options = {}) {
   return body;
 }
 
+const PAGE_SIZE = 50;
+
+/**
+ * Fetches the whole registry a page at a time so the first screen can render before every
+ * biography has downloaded. onPage(rowsSoFar, total) fires after each page. A server that
+ * predates pagination answers with a plain array, which is accepted as the complete list.
+ */
+async function fetchAllPages(name, onPage) {
+  let rows = [];
+  const seen = new Set();
+  let offset = 0;
+  let total = Infinity;
+  while (offset < total) {
+    const page = await request({ name, limit: PAGE_SIZE, offset });
+    if (Array.isArray(page)) {
+      onPage?.(page, page.length);
+      return page;
+    }
+    const fresh = (page.items || []).filter(r => !seen.has(String(r.id)));
+    fresh.forEach(r => seen.add(String(r.id)));
+    rows = rows.concat(fresh);
+    total = Number(page.total) || 0;
+    offset += PAGE_SIZE;
+    onPage?.(rows, total);
+    if (!page.items?.length) break;
+  }
+  return rows;
+}
+
 export const actressApi = {
-  getAll: (name = '') => request({ name }),
+  getAll: (name = '', onPage) => fetchAllPages(name, onPage),
   getById: id => request({ id }),
   create: actress => request({}, { method: 'POST', body: JSON.stringify(actress) }),
   update: (id, actress) => request({ id }, { method: 'PUT', body: JSON.stringify(actress) }),
