@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View, RefreshControl } from 'react-native';
 import AppHeader from '../components/AppHeader';
-import { Avatar, Button, Chip, StatusPill } from '../components/ui';
+import { Avatar, Button, Chip, EmptyState, ListStatus, StatusPill } from '../components/ui';
 import { colors, radius, shadow, fonts } from '../theme';
 import { recentlyUpdated, toCsv } from '../data/actressModel';
 
@@ -20,7 +20,7 @@ function sinceLabel(stamp) {
   return `Refreshed ${Math.round(mins / 60)} h ago`;
 }
 
-export default function ManageScreen({ actresses, source, syncing, lastSync, onProfile, onAdd, onEdit, onDelete, onApprove, onSync, onToast, onRefresh, refreshing }) {
+export default function ManageScreen({ actresses, source, syncing, lastSync, onProfile, onAdd, onEdit, onDelete, onApprove, onSync, onToast, onRefresh, refreshing, loading, loadError, onRetry }) {
   const [tab, setTab] = useState('all');
   const [search, setSearch] = useState('');
 
@@ -108,6 +108,7 @@ export default function ManageScreen({ actresses, source, syncing, lastSync, onP
         ))}
       </ScrollView>
 
+      <ListStatus loading={loading} error={loadError} onRetry={onRetry} hasItems={actresses.length > 0}>
       {rows.length ? rows.map(a => (
         <View key={a.id} style={s.card}>
           <Pressable onPress={() => onProfile(a)} style={s.cardTop}>
@@ -138,8 +139,9 @@ export default function ManageScreen({ actresses, source, syncing, lastSync, onP
           )}
         </View>
       )) : (
-        <Text style={s.none}>No records in this view.</Text>
+        <EmptyState icon="⌕" title="No records in this view" body="Switch tabs or adjust the search to see more of the registry." />
       )}
+      </ListStatus>
 
       <View style={s.footerActions}>
         <Button label="⤓ Export Database CSV" variant="secondary" onPress={exportCsv} style={{ flex: 1 }} />
@@ -190,6 +192,5 @@ const s = StyleSheet.create({
   meta: { color: colors.text, fontSize: 13, marginTop: 4 },
   id: { color: colors.muted, fontSize: 12, marginTop: 3 },
   cardActions: { flexDirection: 'row', marginTop: 12 },
-  none: { marginHorizontal: 20, marginVertical: 20, color: colors.muted, textAlign: 'center' },
   footerActions: { flexDirection: 'row', margin: 20, marginTop: 10 },
 });

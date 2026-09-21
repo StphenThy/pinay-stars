@@ -2,11 +2,11 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
 import AppHeader from '../components/AppHeader';
 import ActressCard from '../components/ActressCard';
-import { EmptyState } from '../components/ui';
+import { EmptyState, ListStatus } from '../components/ui';
 import { colors, radius, fonts } from '../theme';
 import { useAuth } from '../auth';
 
-export default function FavoritesScreen({ favorites, onProfile, onFavorite, onNavigate, onRefresh, refreshing }) {
+export default function FavoritesScreen({ actresses, favorites, onProfile, onFavorite, onNavigate, onRefresh, refreshing, loading, loadError, onRetry }) {
   const { account, openAccount } = useAuth();
   return (
     <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} tintColor={colors.burgundy} colors={[colors.burgundy]} />}>
@@ -25,6 +25,7 @@ export default function FavoritesScreen({ favorites, onProfile, onFavorite, onNa
         </Pressable>
       )}
 
+      <ListStatus loading={loading} error={loadError} onRetry={onRetry} hasItems={actresses.length > 0}>
       {favorites.length ? (
         <>
           <Text style={s.groupLabel}>Curated ({favorites.length})</Text>
@@ -41,6 +42,7 @@ export default function FavoritesScreen({ favorites, onProfile, onFavorite, onNa
           onAction={() => onNavigate('directory')}
         />
       )}
+      </ListStatus>
     </ScrollView>
   );
 }

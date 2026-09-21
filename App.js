@@ -37,6 +37,7 @@ export default function App() {
   const [source, setSource] = useState('online');
   const [syncing, setSyncing] = useState(false);
   const [lastSync, setLastSync] = useState(null);
+  const [loadError, setLoadError] = useState('');
   const [rows, setRows] = useState([]);
 
   const [stack, setStack] = useState([{ name: 'home' }]);
@@ -121,11 +122,13 @@ export default function App() {
       const data = await actressApi.getAll();
       setRows(Array.isArray(data) ? data : []);
       setSource('online');
+      setLoadError('');
       setLastSync(Date.now());
       if (!silent) showToast('success', 'Registry synced with the cloud');
       if (accountRef.current) refreshNotifications();
     } catch (err) {
       setSource('offline');
+      setLoadError(err.message);
       if (!silent) showToast('error', err.message);
     } finally {
       setSyncing(false);
@@ -463,6 +466,8 @@ export default function App() {
     actresses, query, setQuery, category, setCategory, favorites,
     onFavorite: toggleFavorite, onNavigate: navigate, onProfile: openProfile, source,
     onRefresh: () => load({ silent: true }), refreshing: syncing,
+    // First-load and failure states for the list screens; once records are cached they stay visible.
+    loading: !ready, loadError, onRetry: () => load(),
   };
 
   // Reviews update the cached average/count on the actress row so cards elsewhere reflect it immediately.

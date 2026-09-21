@@ -2,13 +2,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View, RefreshControl } from 'react-native';
 import AppHeader from '../components/AppHeader';
 import ActressCard from '../components/ActressCard';
-import { Button, EmptyState, Kicker } from '../components/ui';
+import { Button, EmptyState, Kicker, ListStatus } from '../components/ui';
 import { colors, radius, shadow, statusMeta, fonts } from '../theme';
 import { DEFAULT_FILTERS, ERAS, SORTS, activeFilterCount, applyFilters, sortActresses } from '../data/actressModel';
 
 const PAGE_SIZE = 5;
 
-export default function DirectoryScreen({ actresses, query, setQuery, filters, setFilters, favorites, onFavorite, onProfile, onOpenFilters, onSuggest, onRefresh, refreshing }) {
+export default function DirectoryScreen({ actresses, query, setQuery, filters, setFilters, favorites, onFavorite, onProfile, onOpenFilters, onSuggest, onRefresh, refreshing, loading, loadError, onRetry }) {
   const [visible, setVisible] = useState(PAGE_SIZE);
 
   const results = useMemo(
@@ -94,6 +94,7 @@ export default function DirectoryScreen({ actresses, query, setQuery, filters, s
         </ScrollView>
       ) : null}
 
+      <ListStatus loading={loading} error={loadError} onRetry={onRetry} hasItems={actresses.length > 0}>
       {shown.map(a => (
         <ActressCard
           key={a.id}
@@ -120,6 +121,7 @@ export default function DirectoryScreen({ actresses, query, setQuery, filters, s
           ) : null}
         </View>
       )}
+      </ListStatus>
 
       <View style={s.cta}>
         <View style={{ flex: 1 }}>

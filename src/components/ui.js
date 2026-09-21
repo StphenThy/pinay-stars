@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, radius, statusMeta, fonts } from '../theme';
 
 export function Kicker({ children, style }) {
@@ -90,6 +90,41 @@ export function EmptyState({ icon = '✦', title, body, action, onAction }) {
   );
 }
 
+export function LoadingState({ title = 'Loading the registry…', body }) {
+  return (
+    <View style={s.empty}>
+      <ActivityIndicator color={colors.burgundy} size="large" />
+      <Text style={[s.emptyTitle, { marginTop: 16 }]}>{title}</Text>
+      {body ? <Text style={s.emptyBody}>{body}</Text> : null}
+    </View>
+  );
+}
+
+export function ErrorState({ title = 'Could not reach the registry', message, onRetry }) {
+  return (
+    <View style={[s.empty, s.emptyError]}>
+      <Text style={[s.emptyIcon, { color: colors.danger }]}>!</Text>
+      <Text style={s.emptyTitle}>{title}</Text>
+      {message ? <Text style={s.emptyBody}>{message}</Text> : null}
+      {onRetry ? (
+        <Pressable onPress={onRetry} style={s.emptyButton}>
+          <Text style={s.emptyButtonText}>Try again</Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
+/**
+ * Shared loading / error gate for list screens. While the first load is in flight, or when it
+ * failed and nothing is cached, it shows the matching state; otherwise it renders the children.
+ */
+export function ListStatus({ loading, error, onRetry, hasItems, children }) {
+  if (!hasItems && loading) return <LoadingState />;
+  if (!hasItems && error) return <ErrorState message={error} onRetry={onRetry} />;
+  return children;
+}
+
 export function Button({ label, onPress, variant = 'primary', disabled, style, small }) {
   const variants = {
     primary: [s.btnPrimary, s.btnPrimaryText],
@@ -136,6 +171,7 @@ const s = StyleSheet.create({
 
   empty: { margin: 20, padding: 32, alignItems: 'center', backgroundColor: colors.white, borderRadius: radius.xl, borderWidth: 1, borderColor: colors.line },
   emptyIcon: { fontSize: 44, color: colors.burgundy },
+  emptyError: { borderColor: colors.dangerSoft },
   emptyTitle: { fontFamily: fonts.serif, fontWeight: '700', color: colors.burgundy, fontSize: 24, marginTop: 8, textAlign: 'center' },
   emptyBody: { color: colors.text, textAlign: 'center', fontSize: 15, lineHeight: 22, marginTop: 8 },
   emptyButton: { marginTop: 18, backgroundColor: colors.burgundy, borderRadius: radius.md, paddingVertical: 12, paddingHorizontal: 22 },

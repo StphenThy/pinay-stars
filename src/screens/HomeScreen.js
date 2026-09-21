@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import AppHeader from '../components/AppHeader';
 import ActressCard from '../components/ActressCard';
-import { Avatar, Button, Chip, EmptyState, Kicker, SectionHeader, Tag } from '../components/ui';
+import { Avatar, Button, Chip, EmptyState, Kicker, ListStatus, SectionHeader, Tag } from '../components/ui';
 import { colors, radius, shadow, fonts } from '../theme';
 import { matchesQuery, sortActresses } from '../data/actressModel';
 import { useAuth } from '../auth';
@@ -19,7 +19,7 @@ function inCategory(a, category) {
   return a.genres.some(g => g.toLowerCase().includes(category.toLowerCase()));
 }
 
-export default function HomeScreen({ actresses, query, setQuery, category, setCategory, favorites, onFavorite, onNavigate, onProfile, source, onRefresh, refreshing }) {
+export default function HomeScreen({ actresses, query, setQuery, category, setCategory, favorites, onFavorite, onNavigate, onProfile, source, onRefresh, refreshing, loading, loadError, onRetry }) {
   const [page, setPage] = useState(0);
   const carousel = useRef(null);
   const { isAdmin } = useAuth();
@@ -88,6 +88,7 @@ export default function HomeScreen({ actresses, query, setQuery, category, setCa
         subtitle={filtered ? `${pool.length} talent${pool.length === 1 ? '' : 's'} in ${category}${query.trim() ? ` matching “${query.trim()}”` : ''}` : 'Tap a card to reveal details'}
         action={featured.length > 1 ? 'Swipe to explore' : undefined}
       />
+      <ListStatus loading={loading} error={loadError} onRetry={onRetry} hasItems={actresses.length > 0}>
       {featured.length ? (
         <>
           <ScrollView
@@ -125,6 +126,7 @@ export default function HomeScreen({ actresses, query, setQuery, category, setCa
           onAction={() => { setCategory('All Talents'); setQuery(''); }}
         />
       )}
+      </ListStatus>
 
       <SectionHeader
         title="Popular Headliners"

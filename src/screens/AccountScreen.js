@@ -40,7 +40,7 @@ export default function AccountScreen({ account, favoritesCount, pendingCount, b
 
   useEffect(() => {
     if (isAdmin) return;
-    authApi.mySubmissions().then(rows => setMine((rows || []).map(normalizeActress))).catch(() => setMine([]));
+    authApi.mySubmissions().then(rows => setMine((rows || []).map(normalizeActress))).catch(err => setMine({ error: err.message }));
   }, [isAdmin]);
 
   const submitPassword = () => {
@@ -114,7 +114,7 @@ export default function AccountScreen({ account, favoritesCount, pendingCount, b
             </Pressable>
           ) : (
             <View style={s.stat}>
-              <Text style={s.statValue}>{mine ? mine.length : '–'}</Text>
+              <Text style={s.statValue}>{Array.isArray(mine) ? mine.length : '–'}</Text>
               <Text style={s.statLabel}>Suggestions</Text>
             </View>
           )}
@@ -137,6 +137,8 @@ export default function AccountScreen({ account, favoritesCount, pendingCount, b
             <Text style={s.cardTitle}>Submitted by you</Text>
             {mine === null ? (
               <Text style={s.cardBody}>Loading…</Text>
+            ) : mine.error ? (
+              <Text style={s.error}>Could not load your suggestions: {mine.error}</Text>
             ) : mine.length === 0 ? (
               <Text style={s.cardBody}>You haven't suggested anyone yet. Suggestions appear here with their review status.</Text>
             ) : mine.map((a, i) => (
