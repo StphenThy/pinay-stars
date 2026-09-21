@@ -16,7 +16,7 @@
  * for 30 days, so each title is fetched from TMDB at most once a month. Failures never
  * break the request: an unmatched or errored title simply comes back null.
  *
- * Included by pinay_actresses.php after the session has been resolved.
+ * Included by pinay_actresses.php after the session has been resolved. (v2: reports transport errors)
  */
 
 if ($action === 'posters' && $method === 'GET') {
@@ -106,6 +106,8 @@ if ($action === 'posters' && $method === 'GET') {
         $body = $http_get('https://api.themoviedb.org/3/search/' . $kind . '?' . http_build_query($params));
         $data = $body ? json_decode($body, true) : null;
         if ($data === null && $lastError !== '') { $errors[$title] = $lastError; }
+        elseif ($data === null && $body !== null) { $errors[$title] = 'unparseable: ' . substr((string) $body, 0, 160); }
+        elseif (is_array($data) && !isset($data['results'])) { $errors[$title] = 'tmdb: ' . substr((string) $body, 0, 160); }
 
         $value = null;
         if (is_array($data) && !empty($data['results'])) {
