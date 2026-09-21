@@ -63,20 +63,24 @@ if ($action === 'posters' && $method === 'GET') {
             if (is_file($caFile)) { $opts[CURLOPT_CAINFO] = $caFile; }
             curl_setopt_array($ch, $opts);
             $body = curl_exec($ch);
-            if ($body === false) { $lastError = 'curl: ' . curl_error($ch); }
+            $curlError = $body === false ? ('curl: ' . (curl_error($ch) ?: 'errno ' . curl_errno($ch))) : '';
             $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
             if ($body !== false && $code >= 400) { $lastError = "tmdb http $code"; return null; }
-            return $body === false ? null : $body;
+            if ($body !== false) { return $body; }
+            // curl is present but blocked on some shared hosts; fall through to the stream wrapper.
+            $lastError = $curlError;
         }
         $ssl = is_file($caFile) ? ['cafile' => $caFile] : [];
         $ctx = stream_context_create(['http' => ['timeout' => 8], 'ssl' => $ssl]);
         $body = @file_get_contents($url, false, $ctx);
         if ($body === false) {
             $e = error_get_last();
-            $lastError = 'fopen: ' . ($e ? $e['message'] : 'unknown error');
+            $lastError = trim($lastError . ' | fopen: ' . ($e ? $e['message'] : (ini_get('allow_url_fopen') ? 'unknown error' : 'allow_url_fopen is off')), ' |');
+            return null;
         }
-        return $body === false ? null : $body;
+        $lastError = '';
+        return $body;
     };
 
     /** Prefers a Philippine / Tagalog result with a poster; falls back to the first with a poster. */
