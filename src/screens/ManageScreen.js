@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View, RefreshControl } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import AppHeader from '../components/AppHeader';
 import { Avatar, Button, Chip, EmptyState, ListStatus, StatusPill } from '../components/ui';
-import { colors, radius, shadow, fonts } from '../theme';
+import { colors, radius, shadow, space, touch, type } from '../theme';
 import { recentlyUpdated, toCsv } from '../data/actressModel';
 
 const TABS = [
@@ -46,40 +47,41 @@ export default function ManageScreen({ actresses, source, syncing, lastSync, onP
     <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" refreshControl={<RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} tintColor={colors.burgundy} colors={[colors.burgundy]} />}>
       <AppHeader
         section="MANAGE"
-        right={<View style={s.adminBadge}><Text style={s.adminBadgeText}>ADMIN MODE • FULL ACCESS</Text></View>}
+        right={<View style={s.adminBadge} accessible accessibilityLabel="Admin mode, full access"><Ionicons name="shield-checkmark" size={12} color={colors.burgundy} /><Text style={s.adminBadgeText}>ADMIN</Text></View>}
       />
 
       <View style={s.headingRow}>
-        <Text style={s.heading}>Manage Actresses</Text>
-        <Text style={s.records}>• {actresses.length} Records</Text>
+        <Text style={s.heading} accessibilityRole="header">Manage Actresses</Text>
+        <Text style={s.records}>{actresses.length} records</Text>
       </View>
       <Text style={s.desc}>Editorial roster verification, metadata curation, and cast availability.</Text>
 
-      <Pressable onPress={onAdd} style={s.add}>
-        <View style={s.addIcon}><Text style={s.addIconText}>＋</Text></View>
+      <Pressable onPress={onAdd} style={({ pressed }) => [s.add, pressed && { opacity: 0.9 }]} accessibilityRole="button" accessibilityLabel="Add new actress">
+        <View style={s.addIcon}><Ionicons name="add" size={26} color={colors.white} /></View>
         <View style={{ flex: 1 }}>
           <Text style={s.addTitle}>Add New Actress</Text>
           <Text style={s.addBody}>Draft profile, headshots & representation data</Text>
         </View>
-        <Text style={s.addChevron}>›</Text>
+        <Ionicons name="chevron-forward" size={22} color={colors.white} style={s.chevron} />
       </Pressable>
 
       {pending ? (
-        <Pressable onPress={() => setTab('review')} style={s.pendingBanner}>
+        <Pressable onPress={() => setTab('review')} style={s.pendingBanner} accessibilityRole="button" accessibilityLabel={`${pending} submissions awaiting review. Show them`}>
           <View style={s.pendingIcon}><Text style={s.pendingIconText}>{pending}</Text></View>
           <View style={{ flex: 1 }}>
             <Text style={s.pendingTitle}>{pending} submission{pending === 1 ? '' : 's'} awaiting review</Text>
             <Text style={s.pendingBody}>Suggested by visitors. Approve to publish or reject to remove.</Text>
           </View>
-          <Text style={s.pendingChevron}>›</Text>
+          <Ionicons name="chevron-forward" size={22} color={colors.warning} style={s.chevron} />
         </Pressable>
       ) : null}
 
       <View style={s.roster}>
         <View style={s.rosterHead}>
-          <Text style={s.rosterKicker}>ROSTER STATUS</Text>
+          <Text style={s.rosterKicker}>Roster status</Text>
           <View style={[s.rosterState, source === 'offline' && s.rosterStateOffline]}>
-            <Text style={s.rosterStateText}>{source === 'offline' ? '● Offline Archive' : '● Cloud Synced'}</Text>
+            <Ionicons name={source === 'offline' ? 'cloud-offline-outline' : 'cloud-done-outline'} size={13} color={source === 'offline' ? colors.warning : colors.success} style={{ marginRight: 4 }} />
+            <Text style={s.rosterStateText}>{source === 'offline' ? 'Offline Archive' : 'Cloud Synced'}</Text>
           </View>
         </View>
         <Text style={s.rosterTitle}>{actresses.length} Actresses</Text>
@@ -90,8 +92,9 @@ export default function ManageScreen({ actresses, source, syncing, lastSync, onP
       </View>
 
       <View style={s.search}>
-        <Text style={s.searchIcon}>⌕</Text>
+        <Ionicons name="search-outline" size={18} color={colors.rose} />
         <TextInput
+          accessibilityLabel="Filter records by name or genre"
           value={search}
           onChangeText={setSearch}
           placeholder="Filter database records by name or genre..."
@@ -139,58 +142,55 @@ export default function ManageScreen({ actresses, source, syncing, lastSync, onP
           )}
         </View>
       )) : (
-        <EmptyState icon="⌕" title="No records in this view" body="Switch tabs or adjust the search to see more of the registry." />
+        <EmptyState icon="search-outline" title="No records in this view" body="Switch tabs or adjust the search to see more of the registry." />
       )}
       </ListStatus>
 
       <View style={s.footerActions}>
-        <Button label="⤓ Export Database CSV" variant="secondary" onPress={exportCsv} style={{ flex: 1 }} />
-        <Button label={syncing ? 'Syncing…' : '⟳ Sync Cloud Registry'} onPress={onSync} disabled={syncing} style={{ flex: 1, marginLeft: 10 }} />
+        <Button label="Export CSV" icon="download-outline" variant="secondary" onPress={exportCsv} style={{ flex: 1 }} accessibilityLabel="Export database as CSV" />
+        <Button label={syncing ? 'Syncing…' : 'Sync Registry'} icon="sync-outline" onPress={onSync} disabled={syncing} style={{ flex: 1, marginLeft: space.sm }} />
       </View>
     </ScrollView>
   );
 }
 
 const s = StyleSheet.create({
-  page: { paddingBottom: 30 },
-  adminBadge: { backgroundColor: colors.blushDeep, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 6 },
-  adminBadgeText: { color: colors.burgundy, fontWeight: '700', fontSize: 9, letterSpacing: 0.8 },
-  headingRow: { flexDirection: 'row', alignItems: 'baseline', paddingHorizontal: 20 },
-  heading: { fontFamily: fonts.serif, fontSize: 32, color: colors.burgundy, fontWeight: '700' },
-  records: { color: colors.rose, fontWeight: '700', fontSize: 13, marginLeft: 10 },
-  desc: { paddingHorizontal: 20, fontSize: 14, color: colors.text, lineHeight: 21, marginTop: 4 },
-  add: { margin: 20, marginBottom: 12, padding: 16, borderRadius: radius.lg, backgroundColor: colors.burgundy, flexDirection: 'row', alignItems: 'center' },
-  addIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.16)', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-  addIconText: { color: colors.white, fontSize: 24, fontWeight: '700' },
-  addTitle: { color: colors.white, fontSize: 17, fontWeight: '700' },
-  addBody: { color: '#FBD5D9', fontSize: 12, marginTop: 2 },
-  addChevron: { color: colors.white, fontSize: 26, marginLeft: 8 },
-  pendingBanner: { marginHorizontal: 20, marginBottom: 14, padding: 14, borderRadius: radius.lg, backgroundColor: colors.warningSoft, borderWidth: 1, borderColor: '#F3DFA6', flexDirection: 'row', alignItems: 'center' },
-  pendingIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.warning, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-  pendingIconText: { color: colors.white, fontWeight: '700', fontSize: 16 },
-  pendingTitle: { color: colors.warning, fontWeight: '700', fontSize: 15 },
-  pendingBody: { color: colors.text, fontSize: 12, marginTop: 2 },
-  pendingChevron: { color: colors.warning, fontSize: 26, marginLeft: 8 },
-  roster: { marginHorizontal: 20, marginBottom: 14, backgroundColor: colors.white, borderRadius: radius.lg, padding: 16, ...shadow.card },
+  page: { paddingBottom: space.xxxl },
+  adminBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.blushDeep, borderRadius: radius.pill, paddingHorizontal: space.md, paddingVertical: space.sm, minHeight: 36 },
+  adminBadgeText: { ...type.kicker, marginLeft: space.xs },
+  headingRow: { flexDirection: 'row', alignItems: 'baseline', paddingHorizontal: space.page },
+  heading: { ...type.h1 },
+  records: { ...type.smallStrong, color: colors.rose, marginLeft: space.md },
+  desc: { ...type.small, paddingHorizontal: space.page, marginTop: space.xs },
+  add: { margin: space.page, marginBottom: space.md, padding: space.lg, borderRadius: radius.lg, backgroundColor: colors.burgundy, flexDirection: 'row', alignItems: 'center' },
+  addIcon: { width: touch.min, height: touch.min, borderRadius: touch.min / 2, backgroundColor: colors.onDarkFillStrong, alignItems: 'center', justifyContent: 'center', marginRight: space.md },
+  addTitle: { ...type.title, color: colors.white },
+  addBody: { ...type.caption, color: colors.onDarkSoft, marginTop: 2 },
+  chevron: { marginLeft: space.sm },
+  pendingBanner: { marginHorizontal: space.page, marginBottom: space.md, padding: space.md, borderRadius: radius.lg, backgroundColor: colors.warningSoft, borderWidth: 1, borderColor: colors.warningLine, flexDirection: 'row', alignItems: 'center' },
+  pendingIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.warning, alignItems: 'center', justifyContent: 'center', marginRight: space.md },
+  pendingIconText: { ...type.title, color: colors.white },
+  pendingTitle: { ...type.bodyStrong, color: colors.warning },
+  pendingBody: { ...type.caption, fontWeight: '400', marginTop: 2 },
+  roster: { marginHorizontal: space.page, marginBottom: space.md, backgroundColor: colors.white, borderRadius: radius.lg, padding: space.lg, ...shadow.card },
   rosterHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  rosterKicker: { color: colors.rose, fontWeight: '700', fontSize: 11, letterSpacing: 1.4 },
-  rosterState: { backgroundColor: colors.successSoft, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 4 },
+  rosterKicker: { ...type.kicker },
+  rosterState: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.successSoft, borderRadius: radius.pill, paddingHorizontal: space.md, paddingVertical: space.xs },
   rosterStateOffline: { backgroundColor: colors.warningSoft },
-  rosterStateText: { color: colors.textStrong, fontWeight: '700', fontSize: 11 },
-  rosterTitle: { fontFamily: fonts.serif, fontWeight: '700', fontSize: 26, color: colors.burgundy, marginTop: 8 },
-  rosterSub: { color: colors.text, fontSize: 13, marginTop: 2 },
-  rosterWarn: { color: colors.warning, fontSize: 12, lineHeight: 18, marginTop: 8 },
-  search: { height: 50, marginHorizontal: 20, backgroundColor: colors.white, borderRadius: radius.md, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, borderWidth: 1, borderColor: colors.line },
-  searchIcon: { fontSize: 22, color: colors.rose },
-  input: { flex: 1, fontSize: 14, marginLeft: 8, color: colors.textStrong },
-  tabs: { paddingHorizontal: 20, paddingVertical: 14 },
-  card: { marginHorizontal: 20, marginBottom: 12, padding: 14, borderRadius: radius.lg, backgroundColor: colors.white, ...shadow.card },
+  rosterStateText: { ...type.caption, color: colors.textStrong },
+  rosterTitle: { ...type.h1, marginTop: space.sm },
+  rosterSub: { ...type.small, marginTop: 2 },
+  rosterWarn: { ...type.caption, fontWeight: '400', color: colors.warning, lineHeight: 18, marginTop: space.sm },
+  search: { height: 52, marginHorizontal: space.page, backgroundColor: colors.white, borderRadius: radius.md, flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.md, borderWidth: 1, borderColor: colors.line },
+  input: { ...type.small, color: colors.textStrong, flex: 1, marginLeft: space.sm, minHeight: touch.min },
+  tabs: { paddingHorizontal: space.page, paddingVertical: space.md },
+  card: { marginHorizontal: space.page, marginBottom: space.md, padding: space.md, borderRadius: radius.lg, backgroundColor: colors.white, ...shadow.card },
   cardTop: { flexDirection: 'row', alignItems: 'center' },
-  avatar: { width: 54, height: 68, marginRight: 12 },
+  avatar: { width: 54, height: 68, marginRight: space.md },
   cardTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  name: { flex: 1, fontFamily: fonts.serif, fontSize: 19, color: colors.burgundy, fontWeight: '700', marginRight: 8 },
-  meta: { color: colors.text, fontSize: 13, marginTop: 4 },
-  id: { color: colors.muted, fontSize: 12, marginTop: 3 },
-  cardActions: { flexDirection: 'row', marginTop: 12 },
-  footerActions: { flexDirection: 'row', margin: 20, marginTop: 10 },
+  name: { ...type.h3, flex: 1, marginRight: space.sm },
+  meta: { ...type.small, marginTop: space.xs },
+  id: { ...type.caption, fontWeight: '400', marginTop: space.xs },
+  cardActions: { flexDirection: 'row', marginTop: space.md },
+  footerActions: { flexDirection: 'row', margin: space.page, marginTop: space.md },
 });

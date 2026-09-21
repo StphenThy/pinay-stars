@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Animated, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import AppHeader from '../components/AppHeader';
 import ActressCard from '../components/ActressCard';
-import { Avatar, Button, Chip, EmptyState, Kicker, ListStatus, SectionHeader, Tag } from '../components/ui';
-import { colors, radius, shadow, fonts } from '../theme';
+import { Avatar, Button, Chip, EmptyState, IconButton, Kicker, ListStatus, Rise, SectionHeader, Tag } from '../components/ui';
+import { colors, radius, shadow, space, touch, type } from '../theme';
 import { matchesQuery, sortActresses } from '../data/actressModel';
 import { useAuth } from '../auth';
 import PressScale from '../components/PressScale';
@@ -22,6 +23,8 @@ function inCategory(a, category) {
 export default function HomeScreen({ actresses, query, setQuery, category, setCategory, favorites, onFavorite, onNavigate, onProfile, source, onRefresh, refreshing, loading, loadError, onRetry }) {
   const [page, setPage] = useState(0);
   const carousel = useRef(null);
+  // Drives the parallax on the featured portraits; native-driven so it never drops frames.
+  const scrollX = useRef(new Animated.Value(0)).current;
   const { isAdmin } = useAuth();
 
   const isFavorite = a => favorites.some(f => f.id === a.id);
@@ -51,17 +54,18 @@ export default function HomeScreen({ actresses, query, setQuery, category, setCa
       <View style={s.headingRow}>
         <View style={{ flex: 1 }}>
           <Kicker>EDITORIAL SHOWCASE</Kicker>
-          <Text style={s.hero}>Discover Filipina{'\n'}Talent</Text>
+          <Text style={s.hero} accessibilityRole="header">Discover Filipina{'\n'}Talent</Text>
         </View>
-        <View style={s.countPill}>
+        <View style={s.countPill} accessible accessibilityLabel={`${actresses.length} stars in the registry`}>
           <Text style={s.countValue}>{actresses.length}</Text>
           <Text style={s.countLabel}>Stars</Text>
         </View>
       </View>
 
       <View style={s.search}>
-        <Text style={s.searchIcon}>⌕</Text>
+        <Ionicons name="search-outline" size={20} color={colors.rose} />
         <TextInput
+          accessibilityLabel="Search actress, movie, or genre"
           value={query}
           onChangeText={setQuery}
           placeholder="Search actress, movie, or genre..."
@@ -70,14 +74,12 @@ export default function HomeScreen({ actresses, query, setQuery, category, setCa
           returnKeyType="search"
           onSubmitEditing={() => onNavigate('directory')}
         />
-        <Pressable onPress={() => onNavigate('directory')} style={s.filterButton} hitSlop={8}>
-          <Text style={s.filterIcon}>☷</Text>
-        </Pressable>
+        <IconButton icon="options-outline" onPress={() => onNavigate('directory')} label="Open directory filters" size={22} />
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.chips}>
         {CATEGORIES.map(c => (
-          <View key={c} style={{ marginRight: 8 }}>
+          <View key={c} style={{ marginRight: space.sm }}>
             <Chip label={c} active={category === c} onPress={() => setCategory(c)} />
           </View>
         ))}
@@ -91,7 +93,7 @@ export default function HomeScreen({ actresses, query, setQuery, category, setCa
       <ListStatus loading={loading} error={loadError} onRetry={onRetry} hasItems={actresses.length > 0}>
       {featured.length ? (
         <>
-          <ScrollView
+          <Animated.ScrollView
             ref={carousel}
             horizontal
             snapToInterval={CARD_WIDTH}
@@ -99,6 +101,8 @@ export default function HomeScreen({ actresses, query, setQuery, category, setCa
             decelerationRate="fast"
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={s.carousel}
+            onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: true })}
+            scrollEventThrottle={16}
             onMomentumScrollEnd={e => setPage(Math.round(e.nativeEvent.contentOffset.x / CARD_WIDTH))}
           >
             {featured.map((a, i) => (
@@ -110,16 +114,17 @@ export default function HomeScreen({ actresses, query, setQuery, category, setCa
                 onPress={onProfile}
                 onFavorite={onFavorite}
                 favorite={isFavorite(a)}
+                parallax={{ scrollX, index: i, width: CARD_WIDTH }}
               />
             ))}
-          </ScrollView>
+          </Animated.ScrollView>
           <View style={s.dots}>
             {featured.map((a, i) => <View key={a.id} style={[s.dot, page === i && s.dotActive]} />)}
           </View>
         </>
       ) : (
         <EmptyState
-          icon="⌕"
+          icon="search-outline"
           title={`No ${category === 'All Talents' ? 'stars' : category.toLowerCase() + ' talents'} found`}
           body="Try another category or clear the search."
           action="Show all talents"
@@ -144,8 +149,9 @@ export default function HomeScreen({ actresses, query, setQuery, category, setCa
 
       <SectionHeader title="Recently Added to Roster" subtitle="Rising powerhouses and new portfolio updates" />
       <View style={s.recentList}>
-        {recent.map(a => (
-          <PressScale key={a.id} onPress={() => onProfile(a)} style={s.recentRow} scaleTo={0.98}>
+        {recent.map((a, i) => (
+          <Rise key={a.id} delay={i * 70}>
+          <PressScale onPress={() => onProfile(a)} style={s.recentRow} scaleTo={0.98} accessibilityRole="button" accessibilityLabel={`${a.stageName}, ${a.awards[0] || a.occupation}`}>
             <Avatar uri={a.image} name={a.stageName} style={s.recentAvatar} rounded={radius.sm} />
             <View style={{ flex: 1 }}>
               <Text style={s.recentName}>{a.stageName}</Text>
@@ -155,13 +161,14 @@ export default function HomeScreen({ actresses, query, setQuery, category, setCa
                 {a.tvSeries.length ? <Tag label="Streaming Lead" tone="gold" /> : null}
               </View>
             </View>
-            <Text style={s.chevron}>›</Text>
+            <Ionicons name="chevron-forward" size={20} color={colors.muted} style={s.chevron} />
           </PressScale>
+          </Rise>
         ))}
       </View>
 
       <View style={s.registry}>
-        <View style={s.registryIcon}><Text style={s.registryIconText}>▤</Text></View>
+        <View style={s.registryIcon}><Ionicons name="albums-outline" size={20} color={colors.gold} /></View>
         <View style={{ flex: 1 }}>
           <Text style={s.registryTitle}>Database {source === 'offline' ? 'Offline Archive' : 'Active Registry'}</Text>
           <Text style={s.registryMeta}>
@@ -180,37 +187,32 @@ export default function HomeScreen({ actresses, query, setQuery, category, setCa
 }
 
 const s = StyleSheet.create({
-  page: { paddingBottom: 30 },
-  headingRow: { paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center' },
-  hero: { fontFamily: fonts.serif, fontWeight: '700', fontSize: 36, lineHeight: 42, color: colors.burgundy, marginTop: 6 },
-  countPill: { backgroundColor: colors.blushDeep, borderRadius: radius.lg, paddingHorizontal: 16, paddingVertical: 10, alignItems: 'center' },
-  countValue: { fontFamily: fonts.serif, fontWeight: '700', color: colors.burgundy, fontSize: 24 },
-  countLabel: { color: colors.rose, fontWeight: '700', fontSize: 11, letterSpacing: 1 },
-  search: { marginHorizontal: 20, marginTop: 20, height: 56, backgroundColor: colors.white, borderRadius: radius.lg, flexDirection: 'row', alignItems: 'center', paddingLeft: 16, paddingRight: 8, ...shadow.card },
-  searchIcon: { fontSize: 26, color: colors.rose },
-  input: { flex: 1, fontSize: 15, marginLeft: 8, color: colors.textStrong },
-  filterButton: { width: 40, height: 40, borderRadius: radius.sm, backgroundColor: colors.blush, alignItems: 'center', justifyContent: 'center' },
-  filterIcon: { fontSize: 20, color: colors.burgundy },
-  chips: { paddingHorizontal: 20, paddingVertical: 16 },
-  carousel: { paddingHorizontal: 20 },
-  dots: { flexDirection: 'row', justifyContent: 'center', marginTop: 12, marginBottom: 26 },
-  dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.line, marginHorizontal: 3 },
+  page: { paddingBottom: space.xxxl },
+  headingRow: { paddingHorizontal: space.page, flexDirection: 'row', alignItems: 'center' },
+  hero: { ...type.display, marginTop: space.sm },
+  countPill: { backgroundColor: colors.blushDeep, borderRadius: radius.lg, paddingHorizontal: space.lg, paddingVertical: space.md, alignItems: 'center', minWidth: 72 },
+  countValue: { ...type.h2 },
+  countLabel: { ...type.kicker },
+  search: { marginHorizontal: space.page, marginTop: space.xl, height: 56, backgroundColor: colors.white, borderRadius: radius.lg, flexDirection: 'row', alignItems: 'center', paddingLeft: space.lg, paddingRight: space.sm, ...shadow.card },
+  input: { ...type.body, color: colors.textStrong, flex: 1, marginLeft: space.sm, minHeight: touch.min },
+  chips: { paddingHorizontal: space.page, paddingVertical: space.lg },
+  carousel: { paddingHorizontal: space.page },
+  dots: { flexDirection: 'row', justifyContent: 'center', marginTop: space.md, marginBottom: space.xxl },
+  dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.line, marginHorizontal: space.xs },
   dotActive: { backgroundColor: colors.burgundy, width: 20 },
-  horizontal: { paddingHorizontal: 20, paddingBottom: 26 },
-  noneText: { marginHorizontal: 20, marginBottom: 26, color: colors.muted },
-  recentList: { marginHorizontal: 20, backgroundColor: colors.white, borderRadius: radius.lg, paddingHorizontal: 12, ...shadow.card },
-  recentRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderColor: colors.line },
-  recentAvatar: { width: 56, height: 70, marginRight: 12 },
-  recentName: { fontFamily: fonts.serif, fontWeight: '700', fontSize: 18, color: colors.burgundy },
-  recentAward: { color: colors.text, fontSize: 12, marginTop: 2 },
-  recentTags: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 6 },
-  chevron: { fontSize: 26, color: colors.muted, marginLeft: 8 },
-  registry: { marginHorizontal: 20, marginTop: 24, backgroundColor: colors.burgundy, borderRadius: radius.lg, padding: 16, flexDirection: 'row', alignItems: 'center' },
-  registryIcon: { width: 42, height: 42, borderRadius: 21, backgroundColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-  registryIconText: { color: colors.gold, fontSize: 20 },
-  registryTitle: { color: colors.white, fontWeight: '700', fontSize: 15 },
-  registryMeta: { color: '#FBD5D9', fontSize: 12, marginTop: 3 },
-  footer: { alignItems: 'center', paddingHorizontal: 32, paddingTop: 34, paddingBottom: 12 },
-  quote: { fontFamily: fonts.serif, fontStyle: 'italic', color: colors.burgundy, fontSize: 16, lineHeight: 24, textAlign: 'center' },
-  cities: { color: colors.rose, fontWeight: '700', letterSpacing: 2, fontSize: 11, marginTop: 14 },
+  horizontal: { paddingHorizontal: space.page, paddingBottom: space.xxl },
+  recentList: { marginHorizontal: space.page, backgroundColor: colors.white, borderRadius: radius.lg, paddingHorizontal: space.md, ...shadow.card },
+  recentRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: space.md, borderBottomWidth: 1, borderColor: colors.line },
+  recentAvatar: { width: 56, height: 70, marginRight: space.md },
+  recentName: { ...type.h3 },
+  recentAward: { ...type.caption, fontWeight: '400', marginTop: 2 },
+  recentTags: { flexDirection: 'row', flexWrap: 'wrap', marginTop: space.sm },
+  chevron: { marginLeft: space.sm },
+  registry: { marginHorizontal: space.page, marginTop: space.xxl, backgroundColor: colors.burgundy, borderRadius: radius.lg, padding: space.lg, flexDirection: 'row', alignItems: 'center' },
+  registryIcon: { width: touch.min, height: touch.min, borderRadius: touch.min / 2, backgroundColor: colors.onDarkFill, alignItems: 'center', justifyContent: 'center', marginRight: space.md },
+  registryTitle: { ...type.bodyStrong, color: colors.white },
+  registryMeta: { ...type.caption, color: colors.onDarkSoft, marginTop: space.xs },
+  footer: { alignItems: 'center', paddingHorizontal: space.xxxl, paddingTop: space.xxxl, paddingBottom: space.md },
+  quote: { ...type.body, fontFamily: type.h3.fontFamily, fontStyle: 'italic', color: colors.burgundy, fontSize: 16, lineHeight: 24, textAlign: 'center' },
+  cities: { ...type.kicker, marginTop: space.md },
 });

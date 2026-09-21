@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { ImageBackground, Pressable, RefreshControl, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Avatar, Button, StatusPill, Tag } from '../components/ui';
+import { Avatar, Button, HeartButton, IconButton, StatusPill, Tag } from '../components/ui';
 import { Chevron, Collapsible } from '../components/Collapsible';
 import StarRating from '../components/StarRating';
-import { colors, radius, shadow, fonts } from '../theme';
+import { colors, fonts, gradients, radius, shadow, space, touch, type } from '../theme';
 import { formatBirthday, formatReviews, tenureLabel } from '../data/actressModel';
 import { useAuth } from '../auth';
 import { reviewApi } from '../api';
@@ -127,7 +127,7 @@ function ReviewsSection({ actress, onRatingChange, onSignIn, onError }) {
             <StarRating value={r.rating} size={12} style={{ marginTop: 2 }} />
             {r.comment ? <Text style={s.reviewComment}>{r.comment}</Text> : null}
             {isAdmin ? (
-              <Pressable onPress={() => removeAsAdmin(r.id)} disabled={busy} hitSlop={6} style={s.removeLink}>
+              <Pressable onPress={() => removeAsAdmin(r.id)} disabled={busy} hitSlop={8} style={s.removeLink} accessibilityRole="button" accessibilityLabel={`Remove review by ${r.user.display_name}`}>
                 <Text style={s.removeLinkText}>Remove review</Text>
               </Pressable>
             ) : null}
@@ -189,31 +189,28 @@ export default function ProfileScreen({ actress, favorite, onBack, onFavorite, o
       refreshControl={onRefresh ? <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} tintColor={colors.burgundy} colors={[colors.burgundy]} /> : undefined}
     >
       <View style={s.top}>
-        <Pressable onPress={onBack} hitSlop={10} style={s.backRow}>
-          <Ionicons name="chevron-back" size={20} color={colors.rose} />
+        <Pressable onPress={onBack} hitSlop={8} style={s.backRow} accessibilityRole="button" accessibilityLabel="Back">
+          <Ionicons name="chevron-back" size={22} color={colors.rose} />
           <Text style={s.back}>Back</Text>
         </Pressable>
-        <Text style={s.header}>Actress Profile</Text>
+        <Text style={s.header} accessibilityRole="header">Actress Profile</Text>
         <View style={s.topActions}>
-          <Pressable onPress={share} hitSlop={10} style={s.topButton}>
-            <Ionicons name="share-outline" size={20} color={colors.burgundy} />
-          </Pressable>
-          <Pressable onPress={() => { haptic.tap(); onFavorite(actress); }} hitSlop={10} style={s.topButton}>
-            <Ionicons name={favorite ? 'heart' : 'heart-outline'} size={22} color={colors.burgundy} />
-          </Pressable>
+          <IconButton icon="share-outline" onPress={share} label={`Share ${actress.stageName}'s profile`} />
+          <View style={{ width: space.sm }} />
+          <HeartButton favorite={favorite} onPress={() => { haptic.tap(); onFavorite(actress); }} name={actress.stageName} />
         </View>
       </View>
 
-      <ImageBackground source={{ uri: actress.image }} style={s.hero} imageStyle={s.heroImage}>
+      <ImageBackground source={{ uri: actress.image }} style={s.hero} imageStyle={s.heroImage} accessibilityLabel={`Portrait of ${actress.stageName}`}>
         <View style={s.heroTop}>
           <StatusPill status={actress.status} />
           <Text style={s.recordId}>#{actress.displayId}</Text>
         </View>
-        <LinearGradient colors={['transparent', 'rgba(50,0,15,0.6)', 'rgba(50,0,15,0.95)']} locations={[0, 0.4, 1]} style={s.heroCopy}>
-          <Pressable onPress={() => setShowDetails(x => !x)}>
+        <LinearGradient colors={gradients.scrim.colors} locations={gradients.scrim.locations} style={s.heroCopy}>
+          <Pressable onPress={() => setShowDetails(x => !x)} accessibilityRole="button" accessibilityLabel={`${showDetails ? 'Hide' : 'Show'} details for ${actress.stageName}`} accessibilityState={{ expanded: showDetails }}>
             <View style={s.heroHead}>
               <View style={{ flex: 1 }}>
-                <Text style={s.genre}>{actress.genres.join(' / ').toUpperCase() || 'GENRE PENDING'}</Text>
+                <Text style={s.genre}>{actress.genres.join(' / ') || 'Genre pending'}</Text>
                 <Text style={s.name}>{actress.stageName}</Text>
               </View>
               <Chevron open={showDetails} onPress={() => setShowDetails(x => !x)} light label={showDetails ? 'Less' : 'Details'} />
@@ -240,7 +237,7 @@ export default function ProfileScreen({ actress, favorite, onBack, onFavorite, o
           <Text style={s.pendingBody}>Suggested by a visitor. Approve to publish her to the public directory, or reject to delete the submission.</Text>
           <View style={s.actions}>
             <Button label="Approve & Publish" onPress={() => onApprove(actress)} style={{ flex: 1 }} />
-            <Button label="Reject" variant="danger" onPress={() => onDelete(actress)} style={{ flex: 1, marginLeft: 10 }} />
+            <Button label="Reject" variant="danger" onPress={() => onDelete(actress)} style={{ flex: 1, marginLeft: 12 }} />
           </View>
         </View>
       ) : null}
@@ -257,7 +254,7 @@ export default function ProfileScreen({ actress, favorite, onBack, onFavorite, o
         />
       </View>
       {!isAdmin ? (
-        <Pressable onPress={onSignIn} style={s.signInHint}>
+        <Pressable onPress={onSignIn} style={s.signInHint} accessibilityRole="button" accessibilityLabel="Sign in as an administrator to edit or delete this record">
           <Text style={s.signInHintText}>Sign in as an administrator to edit or delete this record</Text>
         </Pressable>
       ) : null}
@@ -303,7 +300,7 @@ export default function ProfileScreen({ actress, favorite, onBack, onFavorite, o
       </View>
 
       {isAdmin ? (
-        <Button label="Delete Actress Record" variant="danger" onPress={() => onDelete(actress)} style={{ marginTop: 10 }} />
+        <Button label="Delete Actress Record" variant="danger" onPress={() => onDelete(actress)} style={{ marginTop: 12 }} />
       ) : null}
     </ScrollView>
   );
@@ -312,47 +309,47 @@ export default function ProfileScreen({ actress, favorite, onBack, onFavorite, o
 const s = StyleSheet.create({
   page: { padding: 20, paddingBottom: 40 },
   top: { height: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  backRow: { flexDirection: 'row', alignItems: 'center', width: 84 },
+  backRow: { flexDirection: 'row', alignItems: 'center', width: 84, minHeight: touch.min },
   back: { color: colors.rose, fontSize: 16, fontWeight: '700' },
   header: { fontFamily: fonts.serif, fontSize: 22, color: colors.burgundy, fontWeight: '700' },
   topActions: { flexDirection: 'row', width: 84, justifyContent: 'flex-end' },
-  topButton: { width: 38, height: 38, borderRadius: 19, backgroundColor: colors.blush, alignItems: 'center', justifyContent: 'center', marginLeft: 6 },
+  topButton: { width: 38, height: 38, borderRadius: radius.lg, backgroundColor: colors.blush, alignItems: 'center', justifyContent: 'center', marginLeft: 8 },
 
-  ratingSummary: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.blush, borderRadius: radius.md, padding: 14 },
-  ratingBig: { fontFamily: fonts.serif, fontWeight: '700', fontSize: 40, color: colors.burgundy, marginRight: 14, minWidth: 56, textAlign: 'center' },
+  ratingSummary: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.blush, borderRadius: radius.md, padding: 12 },
+  ratingBig: { fontFamily: fonts.serif, fontWeight: '700', fontSize: 36, color: colors.burgundy, marginRight: 12, minWidth: 56, textAlign: 'center' },
   ratingCount: { color: colors.text, fontSize: 12, marginTop: 4 },
   rateHint: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
-  rateHintText: { color: colors.burgundy, fontWeight: '700', fontSize: 13, marginLeft: 6 },
-  adminNote: { color: colors.muted, fontSize: 12, marginTop: 10 },
-  mineCard: { marginTop: 14, borderWidth: 1, borderColor: colors.line, borderRadius: radius.md, padding: 14 },
+  rateHintText: { color: colors.burgundy, fontWeight: '700', fontSize: 13, marginLeft: 8 },
+  adminNote: { color: colors.muted, fontSize: 12, marginTop: 12 },
+  mineCard: { marginTop: 12, borderWidth: 1, borderColor: colors.line, borderRadius: radius.md, padding: 12 },
   mineHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  mineTitle: { color: colors.burgundy, fontWeight: '700', fontSize: 14 },
-  mineComment: { color: colors.textStrong, fontSize: 14, lineHeight: 20, marginTop: 8, fontStyle: 'italic' },
+  mineTitle: { color: colors.burgundy, fontWeight: '700', fontSize: 13 },
+  mineComment: { color: colors.textStrong, fontSize: 13, lineHeight: 20, marginTop: 8, fontStyle: 'italic' },
   mineActions: { flexDirection: 'row', marginTop: 12 },
-  reviewInput: { marginTop: 12, minHeight: 72, backgroundColor: colors.background, borderWidth: 1, borderColor: colors.line, borderRadius: radius.md, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, color: colors.textStrong, textAlignVertical: 'top' },
-  reviewRow: { flexDirection: 'row', paddingVertical: 14, borderBottomWidth: 1, borderColor: colors.line },
+  reviewInput: { marginTop: 12, minHeight: 72, backgroundColor: colors.background, borderWidth: 1, borderColor: colors.line, borderRadius: radius.md, paddingHorizontal: 12, paddingVertical: 12, fontSize: 13, color: colors.textStrong, textAlignVertical: 'top' },
+  reviewRow: { flexDirection: 'row', paddingVertical: 12, borderBottomWidth: 1, borderColor: colors.line },
   reviewAvatar: { width: 36, height: 36, marginRight: 12 },
   reviewHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  reviewName: { color: colors.textStrong, fontWeight: '700', fontSize: 14 },
+  reviewName: { color: colors.textStrong, fontWeight: '700', fontSize: 13 },
   reviewTime: { color: colors.muted, fontSize: 11 },
-  reviewComment: { color: colors.text, fontSize: 14, lineHeight: 20, marginTop: 6 },
-  removeLink: { marginTop: 6, alignSelf: 'flex-start' },
+  reviewComment: { color: colors.text, fontSize: 13, lineHeight: 20, marginTop: 8 },
+  removeLink: { marginTop: space.xs, alignSelf: 'flex-start', minHeight: 36, justifyContent: 'center' },
   removeLinkText: { color: colors.danger, fontSize: 12, fontWeight: '700' },
   hero: { height: 480, borderRadius: radius.xl, overflow: 'hidden', justifyContent: 'space-between', marginTop: 8, backgroundColor: colors.burgundySoft, ...shadow.card },
   heroImage: { borderRadius: radius.xl, resizeMode: 'cover' },
-  heroTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 14 },
-  heroCopy: { paddingHorizontal: 18, paddingBottom: 18, paddingTop: 50 },
+  heroTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 12 },
+  heroCopy: { paddingHorizontal: 16, paddingBottom: 16, paddingTop: 50 },
   heroHead: { flexDirection: 'row', alignItems: 'flex-end' },
-  genre: { color: '#FFD3DA', fontWeight: '700', fontSize: 11, letterSpacing: 1 },
-  name: { fontFamily: fonts.serif, fontSize: 34, color: colors.white, fontWeight: '700', marginTop: 2 },
-  legal: { color: '#FBD5D9', fontSize: 13, marginTop: 10 },
-  tagline: { color: colors.white, fontSize: 14, marginTop: 6, fontWeight: '600' },
-  detail: { color: '#FFE8EA', fontSize: 13, lineHeight: 20, marginTop: 6 },
-  ratingRow: { flexDirection: 'row', alignItems: 'baseline', marginTop: 6 },
-  reviews: { color: '#FBD5D9', fontSize: 12, marginLeft: 8, fontWeight: '600' },
-  recordId: { color: colors.white, fontWeight: '700', fontSize: 12, letterSpacing: 1, backgroundColor: 'rgba(50,0,15,0.55)', borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 5, overflow: 'hidden' },
+  genre: { ...type.kicker, color: colors.onDarkSoft },
+  name: { ...type.display, color: colors.white, marginTop: 2 },
+  legal: { color: colors.onDarkSoft, fontSize: 13, marginTop: 12 },
+  tagline: { color: colors.white, fontSize: 13, marginTop: 8, fontWeight: '600' },
+  detail: { color: colors.onDarkSoft, fontSize: 13, lineHeight: 20, marginTop: 8 },
+  ratingRow: { flexDirection: 'row', alignItems: 'baseline', marginTop: 8 },
+  reviews: { color: colors.onDarkSoft, fontSize: 12, marginLeft: 8, fontWeight: '600' },
+  recordId: { color: colors.white, fontWeight: '700', fontSize: 12, letterSpacing: 1, backgroundColor: 'rgba(50,0,15,0.55)', borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 4, overflow: 'hidden' },
   actions: { flexDirection: 'row', marginTop: 16 },
-  pendingBanner: { marginTop: 16, backgroundColor: colors.warningSoft, borderRadius: radius.lg, padding: 16, borderWidth: 1, borderColor: '#F3DFA6' },
+  pendingBanner: { marginTop: 16, backgroundColor: colors.warningSoft, borderRadius: radius.lg, padding: 16, borderWidth: 1, borderColor: colors.warningLine },
   pendingTitle: { color: colors.warning, fontWeight: '700', fontSize: 15 },
   pendingBody: { color: colors.text, fontSize: 13, lineHeight: 19, marginTop: 4 },
   signInHint: { alignItems: 'center', paddingVertical: 12 },
@@ -361,17 +358,17 @@ const s = StyleSheet.create({
   sectionTitle: { fontFamily: fonts.serif, fontSize: 22, color: colors.burgundy, fontWeight: '700', marginBottom: 12 },
   body: { fontSize: 15, lineHeight: 24, color: colors.textStrong },
   metrics: { flexDirection: 'row', marginTop: 16 },
-  metric: { flex: 1, backgroundColor: colors.blush, borderRadius: radius.md, padding: 10, alignItems: 'center', marginHorizontal: 3 },
-  metricValue: { fontFamily: fonts.serif, fontSize: 20, color: colors.burgundy, fontWeight: '700' },
-  metricLabel: { fontSize: 11, color: colors.text, textAlign: 'center', marginTop: 3 },
+  metric: { flex: 1, backgroundColor: colors.blush, borderRadius: radius.md, padding: 12, alignItems: 'center', marginHorizontal: 4 },
+  metricValue: { fontFamily: fonts.serif, fontSize: 18, color: colors.burgundy, fontWeight: '700' },
+  metricLabel: { fontSize: 11, color: colors.text, textAlign: 'center', marginTop: 4 },
   tags: { flexDirection: 'row', flexWrap: 'wrap' },
-  note: { backgroundColor: colors.blush, borderRadius: radius.md, padding: 14, marginTop: 10 },
-  noteTitle: { color: colors.burgundy, fontSize: 14, fontWeight: '700' },
-  noteText: { color: colors.text, fontSize: 14, marginTop: 3 },
+  note: { backgroundColor: colors.blush, borderRadius: radius.md, padding: 12, marginTop: 12 },
+  noteTitle: { color: colors.burgundy, fontSize: 13, fontWeight: '700' },
+  noteText: { color: colors.text, fontSize: 13, marginTop: 4 },
   listRow: { borderBottomWidth: 1, borderColor: colors.line, paddingVertical: 12 },
   listTitle: { fontFamily: fonts.serif, fontSize: 18, color: colors.textStrong },
-  listSub: { color: colors.rose, fontSize: 12, marginTop: 3 },
-  emptyRow: { color: colors.muted, fontSize: 14 },
-  recordMeta: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 18, paddingHorizontal: 4 },
+  listSub: { color: colors.rose, fontSize: 12, marginTop: 4 },
+  emptyRow: { color: colors.muted, fontSize: 13 },
+  recordMeta: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 16, paddingHorizontal: 4 },
   recordMetaText: { color: colors.muted, fontSize: 12 },
 });

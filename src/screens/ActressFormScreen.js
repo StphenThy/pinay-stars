@@ -179,7 +179,7 @@ export default function ActressFormScreen({ mode, actress, busy, onSave, onCance
             disabled={busy}
           />
           {!suggesting && (!editing || isDraft) ? (
-            <Button label={busy ? 'Saving…' : 'Save as Draft'} variant="secondary" onPress={() => submit('draft')} disabled={busy} style={{ marginTop: 10 }} />
+            <Button label={busy ? 'Saving…' : 'Save as Draft'} variant="secondary" onPress={() => submit('draft')} disabled={busy} style={{ marginTop: 12 }} />
           ) : null}
           <Pressable onPress={onCancel} disabled={busy} style={s.cancel}>
             <Text style={s.cancelText}>{editing ? 'Cancel' : 'Cancel & Discard'}</Text>
@@ -200,30 +200,30 @@ export default function ActressFormScreen({ mode, actress, busy, onSave, onCance
 
 const s = StyleSheet.create({
   page: { paddingBottom: 40 },
-  draftPill: { backgroundColor: colors.warningSoft, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 6 },
+  draftPill: { backgroundColor: colors.warningSoft, borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 8 },
   draftPillText: { color: colors.warning, fontWeight: '700', fontSize: 10, letterSpacing: 1 },
   intro: { paddingHorizontal: 20, paddingTop: 4 },
-  title: { fontFamily: fonts.serif, fontWeight: '700', fontSize: 30, color: colors.burgundy, marginTop: 6 },
-  lead: { color: colors.text, fontSize: 14, lineHeight: 21, marginTop: 8 },
+  title: { fontFamily: fonts.serif, fontWeight: '700', fontSize: 28, color: colors.burgundy, marginTop: 8 },
+  lead: { color: colors.text, fontSize: 13, lineHeight: 21, marginTop: 8 },
   leadStrong: { fontWeight: '700', color: colors.burgundy },
-  card: { margin: 20, backgroundColor: colors.white, borderRadius: radius.lg, padding: 18, ...shadow.card },
-  field: { marginBottom: 18 },
-  label: { color: colors.burgundy, fontWeight: '700', fontSize: 14, marginBottom: 8 },
+  card: { margin: 20, backgroundColor: colors.white, borderRadius: radius.lg, padding: 16, ...shadow.card },
+  field: { marginBottom: 16 },
+  label: { color: colors.burgundy, fontWeight: '700', fontSize: 13, marginBottom: 8 },
   required: { color: colors.danger },
-  hint: { color: colors.muted, fontSize: 12, marginTop: 6, lineHeight: 17 },
-  error: { color: colors.danger, fontSize: 12, marginTop: 6, fontWeight: '600' },
-  input: { backgroundColor: colors.background, borderWidth: 1, borderColor: colors.line, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: colors.textStrong },
+  hint: { color: colors.muted, fontSize: 12, marginTop: 8, lineHeight: 17 },
+  error: { color: colors.danger, fontSize: 12, marginTop: 8, fontWeight: '600' },
+  input: { backgroundColor: colors.background, borderWidth: 1, borderColor: colors.line, borderRadius: radius.md, paddingHorizontal: 12, paddingVertical: 12, fontSize: 15, color: colors.textStrong },
   inputError: { borderColor: colors.danger },
   headshotRow: { flexDirection: 'row', alignItems: 'flex-start' },
   headshot: { width: 84, height: 112, marginRight: 12 },
-  headshotNote: { color: colors.muted, fontSize: 12, marginTop: 6 },
-  counter: { alignSelf: 'flex-end', color: colors.muted, fontSize: 12, marginTop: 6 },
+  headshotNote: { color: colors.muted, fontSize: 12, marginTop: 8 },
+  counter: { alignSelf: 'flex-end', color: colors.muted, fontSize: 12, marginTop: 8 },
   chips: { flexDirection: 'row', flexWrap: 'wrap' },
   chipWrap: { marginRight: 8, marginBottom: 8 },
   formError: { marginHorizontal: 20, color: colors.danger, fontWeight: '600', fontSize: 13, textAlign: 'center' },
   formNote: { marginHorizontal: 20, color: colors.muted, fontSize: 12, textAlign: 'center' },
-  actions: { marginHorizontal: 20, marginTop: 14 },
-  cancel: { alignItems: 'center', paddingVertical: 14 },
-  cancelText: { color: colors.rose, fontWeight: '700', fontSize: 14 },
+  actions: { marginHorizontal: 20, marginTop: 12 },
+  cancel: { alignItems: 'center', paddingVertical: 12 },
+  cancelText: { color: colors.rose, fontWeight: '700', fontSize: 13 },
   footnote: { marginHorizontal: 32, color: colors.muted, fontSize: 12, textAlign: 'center', lineHeight: 18 },
 });

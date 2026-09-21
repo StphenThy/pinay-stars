@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { colors, radius, space, touch, type } from '../theme';
 
 // Slides content open/closed. maxHeight is a generous upper bound, not the exact height.
 export function Collapsible({ open, maxHeight = 420, children }) {
@@ -21,17 +23,18 @@ export function Chevron({ open, onPress, light, label }) {
   }, [open, anim]);
   const rotate = anim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '180deg'] });
   return (
-    <Pressable onPress={onPress} hitSlop={10} style={[s.chevron, light && s.chevronLight]}>
+    <Pressable onPress={onPress} hitSlop={6} style={[s.chevron, light && s.chevronLight]} accessibilityRole="button" accessibilityLabel={label || (open ? 'Collapse' : 'Expand')} accessibilityState={{ expanded: !!open }}>
       {label ? <Text style={[s.chevronLabel, light && s.chevronLabelLight]}>{label}</Text> : null}
-      <Animated.Text style={[s.chevronIcon, light && s.chevronLabelLight, { transform: [{ rotate }] }]}>⌄</Animated.Text>
+      <Animated.View style={{ transform: [{ rotate }] }}>
+        <Ionicons name="chevron-down" size={18} color={light ? colors.white : colors.burgundy} />
+      </Animated.View>
     </Pressable>
   );
 }
 
 const s = StyleSheet.create({
-  chevron: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', borderRadius: 999, paddingVertical: 5, paddingHorizontal: 12, backgroundColor: 'rgba(101,0,29,0.08)' },
+  chevron: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-start', minHeight: 36, minWidth: 36, borderRadius: radius.pill, paddingVertical: space.xs, paddingHorizontal: space.md, backgroundColor: 'rgba(101,0,29,0.08)' },
   chevronLight: { backgroundColor: 'rgba(255,255,255,0.18)' },
-  chevronLabel: { fontSize: 12, fontWeight: '700', color: '#65001D', marginRight: 6 },
-  chevronLabelLight: { color: '#FFFFFF' },
-  chevronIcon: { fontSize: 18, lineHeight: 18, fontWeight: '700', color: '#65001D' },
+  chevronLabel: { ...type.caption, color: colors.burgundy, marginRight: space.xs },
+  chevronLabelLight: { color: colors.white },
 });

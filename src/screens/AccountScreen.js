@@ -96,7 +96,7 @@ export default function AccountScreen({ account, favoritesCount, pendingCount, b
             {profileError ? <Text style={s.error}>{profileError}</Text> : null}
             <View style={s.editActions}>
               <Button label={busy ? 'Saving…' : 'Save Profile'} onPress={submitProfile} disabled={busy} style={{ flex: 1 }} />
-              <Button label="Cancel" variant="ghost" onPress={() => setEditing(false)} disabled={busy} style={{ flex: 1, marginLeft: 10 }} />
+              <Button label="Cancel" variant="ghost" onPress={() => setEditing(false)} disabled={busy} style={{ flex: 1, marginLeft: 12 }} />
             </View>
           </View>
         ) : null}
@@ -124,7 +124,7 @@ export default function AccountScreen({ account, favoritesCount, pendingCount, b
           {isAdmin ? (
             <>
               <Button label={pendingCount ? `Review ${pendingCount} pending` : 'Manage registry'} onPress={() => onNavigate('manage')} style={{ flex: 1 }} />
-              <Button label="Add actress" variant="secondary" onPress={() => onNavigate('add')} style={{ flex: 1, marginLeft: 10 }} />
+              <Button label="Add actress" variant="secondary" onPress={() => onNavigate('add')} style={{ flex: 1, marginLeft: 12 }} />
             </>
           ) : (
             <Button label="Suggest an Actress" onPress={() => onNavigate('suggest')} style={{ flex: 1 }} />
@@ -162,7 +162,7 @@ export default function AccountScreen({ account, favoritesCount, pendingCount, b
           <TextInput value={next} onChangeText={setNext} placeholder="New password (min 8 characters)" placeholderTextColor={colors.muted} secureTextEntry autoCapitalize="none" style={s.input} />
           <TextInput value={confirm} onChangeText={setConfirm} placeholder="Confirm new password" placeholderTextColor={colors.muted} secureTextEntry autoCapitalize="none" style={s.input} />
           {error ? <Text style={s.error}>{error}</Text> : null}
-          <Button label={busy ? 'Saving…' : 'Update Password'} variant="secondary" onPress={submitPassword} disabled={busy || !current || !next || !confirm} style={{ marginTop: 6 }} />
+          <Button label={busy ? 'Saving…' : 'Update Password'} variant="secondary" onPress={submitPassword} disabled={busy || !current || !next || !confirm} style={{ marginTop: 8 }} />
         </View>
 
         <Button label="Sign Out" variant="danger" onPress={onLogout} style={{ marginHorizontal: 20 }} />
@@ -180,36 +180,36 @@ const s = StyleSheet.create({
   avatar: { width: 92, height: 92, borderRadius: 46, backgroundColor: colors.burgundy, alignItems: 'center', justifyContent: 'center', borderWidth: 4, borderColor: colors.blushDeep },
   avatarMember: { backgroundColor: colors.rose },
   avatarPhoto: { width: 92, height: 92, borderWidth: 4, borderColor: colors.blushDeep },
-  editLink: { marginTop: 10, paddingVertical: 6, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: colors.blush },
+  editLink: { marginTop: 12, paddingVertical: 8, paddingHorizontal: 12, borderRadius: radius.pill, backgroundColor: colors.blush },
   editLinkText: { color: colors.burgundy, fontWeight: '700', fontSize: 13 },
-  label: { color: colors.burgundy, fontWeight: '700', fontSize: 13, marginBottom: 6, marginTop: 4 },
-  photoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+  label: { color: colors.burgundy, fontWeight: '700', fontSize: 13, marginBottom: 8, marginTop: 4 },
+  photoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
   photoPreview: { width: 60, height: 60, marginRight: 12 },
   editActions: { flexDirection: 'row', marginTop: 8 },
-  avatarText: { color: colors.gold, fontFamily: fonts.serif, fontWeight: '700', fontSize: 34 },
+  avatarText: { color: colors.gold, fontFamily: fonts.serif, fontWeight: '700', fontSize: 36 },
   avatarTextMember: { color: colors.white },
   name: { fontFamily: fonts.serif, fontWeight: '700', fontSize: 28, color: colors.burgundy, marginTop: 12 },
-  username: { color: colors.muted, fontSize: 14, marginTop: 2 },
-  badge: { backgroundColor: colors.burgundy, borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 6, marginTop: 10 },
+  username: { color: colors.muted, fontSize: 13, marginTop: 2 },
+  badge: { backgroundColor: colors.burgundy, borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 8, marginTop: 12 },
   badgeMember: { backgroundColor: colors.blushDeep },
   badgeText: { color: colors.gold, fontWeight: '700', fontSize: 11, letterSpacing: 1 },
   badgeTextMember: { color: colors.burgundy },
   since: { color: colors.muted, fontSize: 12, marginTop: 8 },
-  stats: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 18 },
-  stat: { alignItems: 'center', paddingHorizontal: 26 },
-  statValue: { fontFamily: fonts.serif, fontWeight: '700', fontSize: 26, color: colors.burgundy },
+  stats: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 16 },
+  stat: { alignItems: 'center', paddingHorizontal: 24 },
+  statValue: { fontFamily: fonts.serif, fontWeight: '700', fontSize: 28, color: colors.burgundy },
   statLabel: { color: colors.rose, fontSize: 11, letterSpacing: 1, fontWeight: '700', marginTop: 2 },
   statDivider: { width: 1, height: 30, backgroundColor: colors.line },
   quick: { flexDirection: 'row', margin: 20 },
-  card: { marginHorizontal: 20, marginBottom: 20, backgroundColor: colors.white, borderRadius: radius.lg, padding: 18, ...shadow.card },
-  cardTitle: { fontFamily: fonts.serif, fontWeight: '700', fontSize: 20, color: colors.burgundy, marginTop: 4 },
+  card: { marginHorizontal: 20, marginBottom: 20, backgroundColor: colors.white, borderRadius: radius.lg, padding: 16, ...shadow.card },
+  cardTitle: { fontFamily: fonts.serif, fontWeight: '700', fontSize: 18, color: colors.burgundy, marginTop: 4 },
   cardBody: { color: colors.text, fontSize: 13, marginTop: 4, marginBottom: 12, lineHeight: 19 },
   mineRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12 },
   mineRowBorder: { borderBottomWidth: 1, borderColor: colors.line },
   mineAvatar: { width: 44, height: 56, marginRight: 12 },
   mineName: { fontFamily: fonts.serif, fontWeight: '700', fontSize: 16, color: colors.burgundy },
   mineMeta: { color: colors.muted, fontSize: 12, marginTop: 2 },
-  input: { backgroundColor: colors.background, borderWidth: 1, borderColor: colors.line, borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: colors.textStrong, marginBottom: 10 },
+  input: { backgroundColor: colors.background, borderWidth: 1, borderColor: colors.line, borderRadius: radius.md, paddingHorizontal: 12, paddingVertical: 12, fontSize: 15, color: colors.textStrong, marginBottom: 12 },
   error: { color: colors.danger, fontWeight: '600', fontSize: 13, marginBottom: 8 },
   footnote: { marginHorizontal: 32, marginTop: 12, color: colors.muted, fontSize: 12, textAlign: 'center', lineHeight: 18 },
 });

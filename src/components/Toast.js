@@ -1,11 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, radius } from '../theme';
+import { Ionicons } from '@expo/vector-icons';
+import { colors, radius, shadow, space, type } from '../theme';
 
 const TONES = {
-  success: { bg: colors.success, icon: '✓' },
-  error: { bg: colors.danger, icon: '!' },
-  info: { bg: colors.burgundy, icon: '✦' },
+  success: { bg: colors.success, icon: 'checkmark' },
+  error: { bg: colors.danger, icon: 'alert' },
+  info: { bg: colors.burgundy, icon: 'sparkles' },
 };
 
 export default function Toast({ toast, onDismiss, onPress }) {
@@ -26,20 +27,25 @@ export default function Toast({ toast, onDismiss, onPress }) {
 
   return (
     <Animated.View pointerEvents="box-none" style={[s.wrap, { transform: [{ translateY: slide }] }]}>
-      <Pressable onPress={() => { onDismiss(); onPress && onPress(); }} style={s.pill}>
-        <View style={[s.icon, { backgroundColor: tone.bg }]}><Text style={s.iconText}>{tone.icon}</Text></View>
+      <Pressable
+        onPress={() => { onDismiss(); onPress && onPress(); }}
+        style={s.pill}
+        accessibilityRole="alert"
+        accessibilityLiveRegion="polite"
+        accessibilityLabel={`${toast.tone === 'error' ? 'Error' : 'Notice'}: ${toast.message}. Opens notifications.`}
+      >
+        <View style={[s.icon, { backgroundColor: tone.bg }]}><Ionicons name={tone.icon} size={14} color={colors.white} /></View>
         <Text style={s.text} numberOfLines={1}>{toast.message}</Text>
-        <Text style={s.chevron}>›</Text>
+        <Ionicons name="chevron-forward" size={16} color={colors.muted} style={s.chevron} />
       </Pressable>
     </Animated.View>
   );
 }
 
 const s = StyleSheet.create({
-  wrap: { position: 'absolute', top: 10, left: 0, right: 0, alignItems: 'center', zIndex: 50 },
-  pill: { flexDirection: 'row', alignItems: 'center', maxWidth: '88%', backgroundColor: colors.white, borderRadius: radius.pill, paddingVertical: 7, paddingLeft: 7, paddingRight: 12, borderWidth: 1, borderColor: colors.line, shadowColor: '#000', shadowOpacity: 0.14, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 5 },
-  icon: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 8 },
-  iconText: { color: colors.white, fontWeight: '700', fontSize: 13 },
-  text: { color: colors.textStrong, fontWeight: '600', fontSize: 13, flexShrink: 1 },
-  chevron: { color: colors.muted, fontSize: 18, marginLeft: 8, lineHeight: 18 },
+  wrap: { position: 'absolute', top: space.sm, left: 0, right: 0, alignItems: 'center', zIndex: 50 },
+  pill: { flexDirection: 'row', alignItems: 'center', maxWidth: '88%', minHeight: 44, backgroundColor: colors.white, borderRadius: radius.pill, paddingVertical: space.sm, paddingLeft: space.sm, paddingRight: space.md, borderWidth: 1, borderColor: colors.line, ...shadow.float },
+  icon: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center', marginRight: space.sm },
+  text: { ...type.smallStrong, flexShrink: 1 },
+  chevron: { marginLeft: space.sm },
 });

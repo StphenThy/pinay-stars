@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View, RefreshControl } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import AppHeader from '../components/AppHeader';
 import ActressCard from '../components/ActressCard';
 import { Button, EmptyState, Kicker, ListStatus } from '../components/ui';
-import { colors, radius, shadow, statusMeta, fonts } from '../theme';
+import { colors, radius, shadow, space, statusMeta, touch, type } from '../theme';
 import { DEFAULT_FILTERS, ERAS, SORTS, activeFilterCount, applyFilters, sortActresses } from '../data/actressModel';
 
 const PAGE_SIZE = 5;
@@ -43,16 +44,17 @@ export default function DirectoryScreen({ actresses, query, setQuery, filters, s
       <AppHeader section="ACTRESSES" />
 
       <View style={s.heading}>
-        <Kicker>● ROSTER ARCHIVE</Kicker>
+        <Kicker>Roster archive</Kicker>
         <View style={s.headingRow}>
-          <Text style={s.title}>Actress Directory</Text>
-          <View style={s.count}><Text style={s.countText}>{actresses.length} Stars</Text></View>
+          <Text style={s.title} accessibilityRole="header">Actress Directory</Text>
+          <View style={s.count} accessible accessibilityLabel={`${actresses.length} stars`}><Text style={s.countText}>{actresses.length} Stars</Text></View>
         </View>
       </View>
 
       <View style={s.search}>
-        <Text style={s.searchIcon}>⌕</Text>
+        <Ionicons name="search-outline" size={20} color={colors.rose} />
         <TextInput
+          accessibilityLabel="Search by name, film, or keyword"
           value={query}
           onChangeText={setQuery}
           placeholder="Search by name, film, or keyword..."
@@ -60,16 +62,18 @@ export default function DirectoryScreen({ actresses, query, setQuery, filters, s
           style={s.input}
           returnKeyType="search"
         />
-        {query ? <Pressable onPress={() => setQuery('')} hitSlop={8}><Text style={s.clear}>✕</Text></Pressable> : null}
+        {query ? <Pressable onPress={() => setQuery('')} hitSlop={8} style={s.clear} accessibilityRole="button" accessibilityLabel="Clear search"><Ionicons name="close-circle" size={20} color={colors.muted} /></Pressable> : null}
       </View>
 
       <View style={s.toolbar}>
-        <Pressable onPress={onOpenFilters} style={[s.filtersButton, activeCount > 0 && s.filtersButtonActive]}>
+        <Pressable onPress={onOpenFilters} style={[s.filtersButton, activeCount > 0 && s.filtersButtonActive]} accessibilityRole="button" accessibilityLabel={activeCount > 0 ? `Filters, ${activeCount} active` : 'Filters'}>
+          <Ionicons name="options-outline" size={16} color={activeCount > 0 ? colors.white : colors.burgundy} style={{ marginRight: 6 }} />
           <Text style={[s.filtersText, activeCount > 0 && s.filtersTextActive]}>Filters</Text>
           {activeCount > 0 ? <View style={s.badge}><Text style={s.badgeText}>{activeCount}</Text></View> : null}
         </Pressable>
-        <Pressable onPress={cycleSort} style={s.sortButton}>
-          <Text style={s.sortText}>Sort: {sort.short} ↓</Text>
+        <Pressable onPress={cycleSort} style={s.sortButton} accessibilityRole="button" accessibilityLabel={`Sort by ${sort.short}. Tap to change`}>
+          <Text style={s.sortText}>Sort: {sort.short}</Text>
+          <Ionicons name="swap-vertical" size={16} color={colors.rose} style={{ marginLeft: 4 }} />
         </Pressable>
       </View>
 
@@ -77,17 +81,17 @@ export default function DirectoryScreen({ actresses, query, setQuery, filters, s
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.activeRow}>
           {filters.genres.map(g => (
             <Pressable key={g} onPress={() => removeGenre(g)} style={s.activeChip}>
-              <Text style={s.activeChipText}>Genre: {g}  ✕</Text>
+              <Text style={s.activeChipText}>Genre: {g}</Text><Ionicons name="close" size={14} color={colors.burgundy} style={{ marginLeft: 4 }} />
             </Pressable>
           ))}
           {filters.era !== 'all' && era ? (
             <Pressable onPress={() => setFilters({ ...filters, era: 'all' })} style={s.activeChip}>
-              <Text style={s.activeChipText}>Era: {era.label.split(' (')[0]}  ✕</Text>
+              <Text style={s.activeChipText}>Era: {era.label.split(' (')[0]}</Text><Ionicons name="close" size={14} color={colors.burgundy} style={{ marginLeft: 4 }} />
             </Pressable>
           ) : null}
           {filters.status !== 'all' ? (
             <Pressable onPress={() => setFilters({ ...filters, status: 'all' })} style={s.activeChip}>
-              <Text style={s.activeChipText}>Status: {statusMeta[filters.status]?.label}  ✕</Text>
+              <Text style={s.activeChipText}>Status: {statusMeta[filters.status]?.label}</Text><Ionicons name="close" size={14} color={colors.burgundy} style={{ marginLeft: 4 }} />
             </Pressable>
           ) : null}
           <Pressable onPress={reset} style={s.resetChip}><Text style={s.resetText}>Reset</Text></Pressable>
@@ -107,7 +111,7 @@ export default function DirectoryScreen({ actresses, query, setQuery, filters, s
 
       {!results.length ? (
         <EmptyState
-          icon="⌕"
+          icon="search-outline"
           title="No stars found"
           body="Try a different search, or clear the active filters."
           action={activeCount || query ? 'Clear search & filters' : undefined}
@@ -117,7 +121,7 @@ export default function DirectoryScreen({ actresses, query, setQuery, filters, s
         <View style={s.pager}>
           <Text style={s.pagerText}>Showing {shown.length} of {results.length} star{results.length === 1 ? '' : 's'}</Text>
           {visible < results.length ? (
-            <Button label="Load More Actresses" variant="secondary" onPress={() => setVisible(v => v + PAGE_SIZE)} style={{ marginTop: 10 }} />
+            <Button label="Load More Actresses" variant="secondary" onPress={() => setVisible(v => v + PAGE_SIZE)} style={{ marginTop: 12 }} />
           ) : null}
         </View>
       )}
@@ -143,36 +147,35 @@ export default function DirectoryScreen({ actresses, query, setQuery, filters, s
 }
 
 const s = StyleSheet.create({
-  page: { paddingBottom: 30 },
-  heading: { paddingHorizontal: 20, paddingTop: 4 },
-  headingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 },
-  title: { fontFamily: fonts.serif, fontSize: 32, color: colors.burgundy, fontWeight: '700' },
-  count: { backgroundColor: colors.blushDeep, borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 8 },
-  countText: { color: colors.burgundy, fontWeight: '700', fontSize: 13 },
-  search: { height: 54, marginHorizontal: 20, marginTop: 16, backgroundColor: colors.white, borderRadius: radius.lg, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, ...shadow.card },
-  searchIcon: { fontSize: 26, color: colors.rose },
-  input: { flex: 1, fontSize: 15, marginLeft: 8, color: colors.textStrong },
-  clear: { color: colors.muted, fontSize: 16, padding: 4 },
-  toolbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: 20, marginTop: 14 },
-  filtersButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line, borderRadius: radius.pill, paddingVertical: 9, paddingHorizontal: 14 },
+  page: { paddingBottom: space.xxxl },
+  heading: { paddingHorizontal: space.page, paddingTop: space.xs },
+  headingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: space.sm },
+  title: { ...type.h1 },
+  count: { backgroundColor: colors.blushDeep, borderRadius: radius.pill, paddingHorizontal: space.md, paddingVertical: space.sm },
+  countText: { ...type.smallStrong, color: colors.burgundy },
+  search: { height: 56, marginHorizontal: space.page, marginTop: space.lg, backgroundColor: colors.white, borderRadius: radius.lg, flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.lg, ...shadow.card },
+  input: { ...type.body, color: colors.textStrong, flex: 1, marginLeft: space.sm, minHeight: touch.min },
+  clear: { width: touch.min - 8, height: touch.min - 8, alignItems: 'center', justifyContent: 'center', marginRight: -space.sm },
+  toolbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: space.page, marginTop: space.md },
+  filtersButton: { flexDirection: 'row', alignItems: 'center', minHeight: touch.min - 4, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line, borderRadius: radius.pill, paddingVertical: space.sm, paddingHorizontal: space.md },
   filtersButtonActive: { backgroundColor: colors.burgundy, borderColor: colors.burgundy },
-  filtersText: { color: colors.textStrong, fontWeight: '700', fontSize: 14 },
+  filtersText: { ...type.smallStrong },
   filtersTextActive: { color: colors.white },
-  badge: { marginLeft: 8, minWidth: 20, height: 20, borderRadius: 10, backgroundColor: colors.gold, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5 },
-  badgeText: { color: colors.burgundyDeep, fontWeight: '700', fontSize: 12 },
-  sortButton: { paddingVertical: 9, paddingHorizontal: 4 },
-  sortText: { color: colors.rose, fontWeight: '700', fontSize: 14 },
-  activeRow: { paddingHorizontal: 20, paddingTop: 12 },
-  activeChip: { backgroundColor: colors.blushDeep, borderRadius: radius.pill, paddingVertical: 7, paddingHorizontal: 12, marginRight: 8 },
-  activeChipText: { color: colors.burgundy, fontWeight: '700', fontSize: 12 },
-  resetChip: { paddingVertical: 7, paddingHorizontal: 8 },
-  resetText: { color: colors.rose, fontWeight: '700', fontSize: 12, textDecorationLine: 'underline' },
-  pager: { alignItems: 'center', marginHorizontal: 20, marginTop: 4, marginBottom: 8 },
-  pagerText: { color: colors.text, fontSize: 13 },
-  cta: { margin: 20, backgroundColor: colors.burgundy, borderRadius: radius.lg, padding: 16, flexDirection: 'row', alignItems: 'center' },
-  ctaTitle: { color: colors.white, fontWeight: '700', fontSize: 16 },
-  ctaBody: { color: '#FBD5D9', fontSize: 13, marginTop: 3 },
-  suggest: { marginHorizontal: 20, marginBottom: 10, backgroundColor: colors.white, borderRadius: radius.lg, padding: 16, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: colors.line },
-  suggestTitle: { color: colors.burgundy, fontWeight: '700', fontSize: 15 },
-  suggestBody: { color: colors.text, fontSize: 12, marginTop: 3, marginRight: 10 },
+  badge: { marginLeft: space.sm, minWidth: 20, height: 20, borderRadius: 10, backgroundColor: colors.gold, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.xs },
+  badgeText: { ...type.caption, color: colors.burgundyDeep },
+  sortButton: { flexDirection: 'row', alignItems: 'center', minHeight: touch.min - 4, paddingVertical: space.sm, paddingHorizontal: space.xs },
+  sortText: { ...type.smallStrong, color: colors.rose },
+  activeRow: { paddingHorizontal: space.page, paddingTop: space.md },
+  activeChip: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.blushDeep, borderRadius: radius.pill, paddingVertical: space.sm, paddingHorizontal: space.md, marginRight: space.sm, minHeight: 36 },
+  activeChipText: { ...type.caption, color: colors.burgundy },
+  resetChip: { paddingVertical: space.sm, paddingHorizontal: space.sm, minHeight: 36, justifyContent: 'center' },
+  resetText: { ...type.caption, color: colors.rose, textDecorationLine: 'underline' },
+  pager: { alignItems: 'center', marginHorizontal: space.page, marginTop: space.xs, marginBottom: space.sm },
+  pagerText: { ...type.small },
+  cta: { margin: space.page, backgroundColor: colors.burgundy, borderRadius: radius.lg, padding: space.lg, flexDirection: 'row', alignItems: 'center' },
+  ctaTitle: { ...type.title, color: colors.white },
+  ctaBody: { ...type.small, color: colors.onDarkSoft, marginTop: space.xs },
+  suggest: { marginHorizontal: space.page, marginBottom: space.md, backgroundColor: colors.white, borderRadius: radius.lg, padding: space.lg, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: colors.line },
+  suggestTitle: { ...type.bodyStrong, color: colors.burgundy },
+  suggestBody: { ...type.caption, fontWeight: '400', marginTop: space.xs, marginRight: space.md },
 });

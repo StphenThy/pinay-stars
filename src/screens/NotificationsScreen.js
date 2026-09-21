@@ -1,14 +1,15 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import AppHeader from '../components/AppHeader';
-import { Button, EmptyState, Kicker } from '../components/ui';
-import { colors, fonts, radius, shadow } from '../theme';
+import { Button, EmptyState, Kicker, Rise } from '../components/ui';
+import { colors, radius, shadow, space, touch, type } from '../theme';
 import { timeAgo } from '../notifications';
 
 const TONES = {
-  success: { icon: '✓', bg: colors.successSoft, fg: colors.success, label: 'Success' },
-  error: { icon: '!', bg: colors.dangerSoft, fg: colors.danger, label: 'Error' },
-  info: { icon: '✦', bg: colors.blush, fg: colors.burgundy, label: 'Update' },
+  success: { icon: 'checkmark', bg: colors.successSoft, fg: colors.success, label: 'Success' },
+  error: { icon: 'alert', bg: colors.dangerSoft, fg: colors.danger, label: 'Error' },
+  info: { icon: 'sparkles', bg: colors.blush, fg: colors.burgundy, label: 'Update' },
 };
 
 function groupLabel(stamp) {
@@ -34,46 +35,48 @@ export default function NotificationsScreen({ notifications, onBack, onOpenActre
       <AppHeader section="NOTIFICATIONS" onBack={onBack} right={<View />} />
 
       <View style={s.heading}>
-        <View style={{ flex: 1 }}>
-          <Kicker>ACTIVITY LOG</Kicker>
-          <Text style={s.title}>Notifications</Text>
-          <Text style={s.sub}>{unread ? `${unread} unread` : 'You are all caught up'} • {notifications.length} total</Text>
-        </View>
+        <Kicker>Activity log</Kicker>
+        <Text style={s.title} accessibilityRole="header">Notifications</Text>
+        <Text style={s.sub}>{unread ? `${unread} unread` : 'You are all caught up'} • {notifications.length} total</Text>
       </View>
 
       {notifications.length ? (
         <View style={s.actions}>
-          <Button label="Mark all read" variant="secondary" small onPress={onMarkAllRead} disabled={!unread} />
-          <Button label="Clear all" variant="ghost" small onPress={onClear} style={{ marginLeft: 8 }} />
+          <Button label="Mark all read" variant="secondary" small icon="checkmark-done-outline" onPress={onMarkAllRead} disabled={!unread} />
+          <Button label="Clear all" variant="ghost" small onPress={onClear} style={{ marginLeft: space.sm }} />
         </View>
       ) : null}
 
-      {notifications.length ? Object.entries(groups).map(([label, items]) => (
-        <View key={label}>
-          <Text style={s.group}>{label.toUpperCase()}</Text>
+      {notifications.length ? Object.entries(groups).map(([label, items], g) => (
+        <Rise key={label} delay={g * 60}>
+          <Text style={s.group}>{label}</Text>
           <View style={s.card}>
             {items.map((n, i) => {
               const tone = TONES[n.tone] || TONES.info;
+              const openable = n.actressId !== undefined;
               return (
                 <Pressable
                   key={n.id}
-                  onPress={() => n.actressId !== undefined && onOpenActress(n.actressId)}
-                  style={[s.row, i < items.length - 1 && s.rowBorder, !n.read && s.rowUnread]}
+                  onPress={() => openable && onOpenActress(n.actressId)}
+                  disabled={!openable}
+                  accessibilityRole={openable ? 'button' : 'text'}
+                  accessibilityLabel={`${tone.label}${n.read ? '' : ', unread'}: ${n.message}. ${timeAgo(n.time)}${openable ? '. Opens profile' : ''}`}
+                  style={({ pressed }) => [s.row, i < items.length - 1 && s.rowBorder, !n.read && s.rowUnread, pressed && openable && s.rowPressed]}
                 >
-                  <View style={[s.icon, { backgroundColor: tone.bg }]}><Text style={[s.iconText, { color: tone.fg }]}>{tone.icon}</Text></View>
+                  <View style={[s.icon, { backgroundColor: tone.bg }]}><Ionicons name={tone.icon} size={18} color={tone.fg} /></View>
                   <View style={{ flex: 1 }}>
                     <Text style={[s.message, !n.read && s.messageUnread]}>{n.message}</Text>
-                    <Text style={s.meta}>{tone.label} • {timeAgo(n.time)}{n.actressId !== undefined ? ' • Tap to view profile' : ''}</Text>
+                    <Text style={s.meta}>{tone.label} • {timeAgo(n.time)}{openable ? ' • Tap to view profile' : ''}</Text>
                   </View>
-                  {!n.read ? <View style={s.dot} /> : null}
+                  {!n.read ? <View style={s.dot} /> : openable ? <Ionicons name="chevron-forward" size={18} color={colors.muted} /> : null}
                 </Pressable>
               );
             })}
           </View>
-        </View>
+        </Rise>
       )) : (
         <EmptyState
-          icon="🔔"
+          icon="notifications-outline"
           title="No notifications yet"
           body="Adding, editing or deleting an actress, and syncing the registry, will show up here."
         />
@@ -83,20 +86,20 @@ export default function NotificationsScreen({ notifications, onBack, onOpenActre
 }
 
 const s = StyleSheet.create({
-  page: { paddingBottom: 30 },
-  heading: { paddingHorizontal: 20, paddingTop: 4 },
-  title: { fontFamily: fonts.serif, fontSize: 32, color: colors.burgundy, fontWeight: '700', marginTop: 6 },
-  sub: { color: colors.text, fontSize: 13, marginTop: 4 },
-  actions: { flexDirection: 'row', marginHorizontal: 20, marginTop: 14 },
-  group: { marginHorizontal: 20, marginTop: 20, marginBottom: 8, color: colors.rose, fontWeight: '700', fontSize: 11, letterSpacing: 1.4 },
-  card: { marginHorizontal: 20, backgroundColor: colors.white, borderRadius: radius.lg, overflow: 'hidden', ...shadow.card },
-  row: { flexDirection: 'row', alignItems: 'center', padding: 14 },
+  page: { paddingBottom: space.xxxl },
+  heading: { paddingHorizontal: space.page, paddingTop: space.xs },
+  title: { ...type.h1, marginTop: space.sm },
+  sub: { ...type.small, marginTop: space.xs },
+  actions: { flexDirection: 'row', marginHorizontal: space.page, marginTop: space.md },
+  group: { ...type.kicker, marginHorizontal: space.page, marginTop: space.xl, marginBottom: space.sm },
+  card: { marginHorizontal: space.page, backgroundColor: colors.white, borderRadius: radius.lg, overflow: 'hidden', ...shadow.card },
+  row: { flexDirection: 'row', alignItems: 'center', padding: space.md, minHeight: touch.min + 12 },
   rowBorder: { borderBottomWidth: 1, borderColor: colors.line },
-  rowUnread: { backgroundColor: '#FFF6F7' },
-  icon: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-  iconText: { fontWeight: '700', fontSize: 15 },
-  message: { color: colors.textStrong, fontSize: 14, lineHeight: 20 },
+  rowUnread: { backgroundColor: colors.background },
+  rowPressed: { backgroundColor: colors.blush },
+  icon: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginRight: space.md },
+  message: { ...type.small, color: colors.textStrong },
   messageUnread: { fontWeight: '700' },
-  meta: { color: colors.muted, fontSize: 12, marginTop: 3 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.burgundy, marginLeft: 10 },
+  meta: { ...type.caption, fontWeight: '400', marginTop: space.xs },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.burgundy, marginLeft: space.md },
 });
