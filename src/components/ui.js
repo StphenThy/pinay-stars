@@ -4,10 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, space, statusMeta, touch, type } from '../theme';
 
 /** Fades and lifts its children in on mount. `delay` staggers lists. */
-export function Rise({ children, delay = 0, distance = 12, style }) {
+export function Rise({ children, delay = 0, distance = 18, style }) {
   const anim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    Animated.timing(anim, { toValue: 1, duration: 360, delay, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
+    Animated.timing(anim, { toValue: 1, duration: 440, delay, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
   }, [anim, delay]);
   const translateY = anim.interpolate({ inputRange: [0, 1], outputRange: [distance, 0] });
   return <Animated.View style={[{ opacity: anim, transform: [{ translateY }] }, style]}>{children}</Animated.View>;
@@ -177,7 +177,7 @@ export function HeartButton({ favorite, onPress, light, name }) {
   const scale = useRef(new Animated.Value(1)).current;
   const press = () => {
     Animated.sequence([
-      Animated.spring(scale, { toValue: favorite ? 0.85 : 1.35, useNativeDriver: true, speed: 40, bounciness: 12 }),
+      Animated.spring(scale, { toValue: favorite ? 0.8 : 1.5, useNativeDriver: true, speed: 40, bounciness: 14 }),
       Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 20, bounciness: 8 }),
     ]).start();
     onPress();

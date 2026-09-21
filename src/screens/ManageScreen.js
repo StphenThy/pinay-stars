@@ -3,7 +3,7 @@ import { Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View, Refres
 import { Ionicons } from '@expo/vector-icons';
 import AppHeader from '../components/AppHeader';
 import { Avatar, Button, Chip, EmptyState, ListStatus, StatusPill } from '../components/ui';
-import { colors, radius, shadow, space, touch, type } from '../theme';
+import { colors, radius, shadow, space, touch, type, fonts } from '../theme';
 import { recentlyUpdated, toCsv } from '../data/actressModel';
 
 const TABS = [
@@ -171,7 +171,7 @@ const s = StyleSheet.create({
   pendingIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.warning, alignItems: 'center', justifyContent: 'center', marginRight: space.md },
   pendingIconText: { ...type.title, color: colors.white },
   pendingTitle: { ...type.bodyStrong, color: colors.warning },
-  pendingBody: { ...type.caption, fontWeight: '400', marginTop: 2 },
+  pendingBody: { ...type.caption, fontFamily: fonts.sans, marginTop: 2 },
   roster: { marginHorizontal: space.page, marginBottom: space.md, backgroundColor: colors.white, borderRadius: radius.lg, padding: space.lg, ...shadow.card },
   rosterHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   rosterKicker: { ...type.kicker },
@@ -180,7 +180,7 @@ const s = StyleSheet.create({
   rosterStateText: { ...type.caption, color: colors.textStrong },
   rosterTitle: { ...type.h1, marginTop: space.sm },
   rosterSub: { ...type.small, marginTop: 2 },
-  rosterWarn: { ...type.caption, fontWeight: '400', color: colors.warning, lineHeight: 18, marginTop: space.sm },
+  rosterWarn: { ...type.caption, fontFamily: fonts.sans, color: colors.warning, lineHeight: 18, marginTop: space.sm },
   search: { height: 52, marginHorizontal: space.page, backgroundColor: colors.white, borderRadius: radius.md, flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.md, borderWidth: 1, borderColor: colors.line },
   input: { ...type.small, color: colors.textStrong, flex: 1, marginLeft: space.sm, minHeight: touch.min },
   tabs: { paddingHorizontal: space.page, paddingVertical: space.md },
@@ -190,7 +190,7 @@ const s = StyleSheet.create({
   cardTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   name: { ...type.h3, flex: 1, marginRight: space.sm },
   meta: { ...type.small, marginTop: space.xs },
-  id: { ...type.caption, fontWeight: '400', marginTop: space.xs },
+  id: { ...type.caption, fontFamily: fonts.sans, marginTop: space.xs },
   cardActions: { flexDirection: 'row', marginTop: space.md },
   footerActions: { flexDirection: 'row', margin: space.page, marginTop: space.md },
 });

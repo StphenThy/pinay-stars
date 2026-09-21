@@ -10,7 +10,7 @@ import PressScale from './PressScale';
 import { Ionicons } from '@expo/vector-icons';
 import { haptic } from '../haptics';
 
-const PARALLAX = 24; // px the portrait drifts against its frame while the carousel moves
+const PARALLAX = 32; // px the portrait drifts against its frame while the carousel moves
 
 function FeaturedCard({ actress, featureLabel, favorite, onOpen, onToggle, parallax }) {
   const [expanded, setExpanded] = useState(false);
@@ -180,7 +180,7 @@ const s = StyleSheet.create({
   featuredMeta: { flexDirection: 'row', alignItems: 'baseline', marginTop: space.xs },
   featuredBody: { ...type.small, color: colors.onDark, marginTop: space.sm },
   featuredFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: space.md },
-  featuredKnown: { ...type.caption, color: colors.onDarkSoft, flex: 1, marginRight: space.sm, fontStyle: 'italic' },
+  featuredKnown: { ...type.caption, color: colors.onDarkSoft, flex: 1, marginRight: space.sm },
   featuredReviews: { ...type.caption, color: colors.onDarkSoft, marginLeft: space.sm },
 
   compact: { width: 170, marginRight: space.md },

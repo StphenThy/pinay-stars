@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AppHeader from '../components/AppHeader';
 import ActressCard from '../components/ActressCard';
 import { EmptyState, ListStatus, Rise } from '../components/ui';
-import { colors, radius, space, type } from '../theme';
+import { colors, radius, space, type, fonts } from '../theme';
 import { useAuth } from '../auth';
 
 export default function FavoritesScreen({ actresses, favorites, onProfile, onFavorite, onNavigate, onRefresh, refreshing, loading, loadError, onRetry }) {
@@ -60,7 +60,7 @@ const s = StyleSheet.create({
   syncNote: { flexDirection: 'row', alignItems: 'center', marginHorizontal: space.page, marginBottom: space.lg },
   syncNoteText: { ...type.caption, color: colors.success, marginLeft: space.xs },
   guestNote: { marginHorizontal: space.page, marginBottom: space.lg, backgroundColor: colors.blush, borderRadius: radius.md, padding: space.md },
-  guestNoteText: { ...type.caption, fontWeight: '400', lineHeight: 18 },
-  guestNoteLink: { color: colors.burgundy, fontWeight: '700' },
+  guestNoteText: { ...type.caption, fontFamily: fonts.sans, lineHeight: 18 },
+  guestNoteLink: { color: colors.burgundy, fontFamily: fonts.sansBold },
   groupLabel: { ...type.kicker, marginHorizontal: space.page, marginBottom: space.md },
 });

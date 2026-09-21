@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Easing, Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, fonts, radius, gradients } from '../theme';
 import { Avatar } from '../components/ui';
 
@@ -34,6 +35,7 @@ function Stat({ value, label }) {
 }
 
 export default function IntroScreen({ ready, source, actresses = [], onStart }) {
+  const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const fade = useRef(new Animated.Value(0)).current;
   const rise = useRef(new Animated.Value(24)).current;
@@ -83,7 +85,7 @@ export default function IntroScreen({ ready, source, actresses = [], onStart }) 
   const entrance = { opacity: fade, transform: [{ translateY: rise }] };
 
   return (
-    <LinearGradient colors={gradients.hero.colors} locations={gradients.hero.locations} style={s.page}>
+    <LinearGradient colors={gradients.hero.colors} locations={gradients.hero.locations} style={[s.page, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
       <View style={s.archive}>
         <Text style={s.archiveText}>NATIONAL ARCHIVE • CASTING DOSSIER</Text>
       </View>
@@ -151,32 +153,32 @@ export default function IntroScreen({ ready, source, actresses = [], onStart }) 
 }
 
 const s = StyleSheet.create({
-  page: { flex: 1, paddingHorizontal: 24, paddingTop: 52, paddingBottom: 24, alignItems: 'center' },
+  page: { flex: 1, paddingHorizontal: 24, alignItems: 'center' },
   archive: { backgroundColor: colors.onDarkFill, borderRadius: radius.pill, paddingVertical: 12, paddingHorizontal: 16, borderWidth: 1, borderColor: colors.onDarkFillStrong },
-  archiveText: { color: colors.onDarkSoft, fontSize: 11, fontWeight: '700', letterSpacing: 1.6, textAlign: 'center' },
+  archiveText: { color: colors.onDarkSoft, fontSize: 11, fontFamily: fonts.sansBold, letterSpacing: 1.6, textAlign: 'center' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   logo: { width: 168, height: 168, borderRadius: 36, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 20, shadowOffset: { width: 0, height: 10 }, elevation: 12, overflow: 'hidden' },
   logoImage: { width: 168, height: 168 },
-  logoSpark: { position: 'absolute', top: 10, right: 12, color: colors.gold, fontSize: 18 },
-  brand: { fontFamily: fonts.serif, fontWeight: '700', fontSize: 36, color: colors.onDarkSoft, marginTop: 24, letterSpacing: 0.5 },
-  tagline: { fontSize: 16, color: colors.onDarkSoft, marginTop: 8, letterSpacing: 0.6 },
+  logoSpark: { position: 'absolute', top: 10, right: 12, color: colors.gold, fontFamily: fonts.sans, fontSize: 18 },
+  brand: { fontFamily: fonts.serif, fontSize: 36, color: colors.onDarkSoft, marginTop: 24, letterSpacing: 0.5 },
+  tagline: { fontFamily: fonts.sans, fontSize: 16, color: colors.onDarkSoft, marginTop: 8, letterSpacing: 0.6 },
   box: { backgroundColor: colors.onDarkFill, borderRadius: radius.md, paddingVertical: 12, paddingHorizontal: 16, marginTop: 20, borderWidth: 1, borderColor: colors.onDarkFill },
-  boxText: { color: colors.onDarkSoft, fontSize: 12, fontWeight: '700', letterSpacing: 1.4, textAlign: 'center', lineHeight: 20 },
+  boxText: { color: colors.onDarkSoft, fontSize: 12, fontFamily: fonts.sansBold, letterSpacing: 1.4, textAlign: 'center', lineHeight: 20 },
   stats: { flexDirection: 'row', alignItems: 'center', marginTop: 20 },
   stat: { alignItems: 'center', paddingHorizontal: 16 },
-  statValue: { fontFamily: fonts.serif, fontWeight: '700', fontSize: 28, color: colors.gold },
-  statLabel: { color: colors.onDarkSoft, fontSize: 11, letterSpacing: 1.4, fontWeight: '700', marginTop: 2 },
+  statValue: { fontFamily: fonts.serif, fontSize: 28, color: colors.gold },
+  statLabel: { color: colors.onDarkSoft, fontSize: 11, letterSpacing: 1.4, fontFamily: fonts.sansBold, marginTop: 2 },
   statDivider: { width: 1, height: 28, backgroundColor: colors.onDarkFillStrong },
   stripWrap: { width: '100%', marginBottom: 16 },
-  stripLabel: { color: colors.onDarkSoft, fontSize: 10, letterSpacing: 1.6, fontWeight: '700', marginBottom: 12, textAlign: 'center' },
+  stripLabel: { color: colors.onDarkSoft, fontSize: 10, letterSpacing: 1.6, fontFamily: fonts.sansBold, marginBottom: 12, textAlign: 'center' },
   strip: { flexDirection: 'row' },
   face: { marginRight: FACE_GAP },
   faceImage: { width: FACE, height: FACE, borderWidth: 2, borderColor: 'rgba(255,255,255,0.7)' },
   statusRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
   readyDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.success, marginRight: 8 },
-  statusText: { color: colors.onDarkSoft, fontSize: 12, fontWeight: '700', letterSpacing: 1.6, marginLeft: 8 },
+  statusText: { color: colors.onDarkSoft, fontSize: 12, fontFamily: fonts.sansBold, letterSpacing: 1.6, marginLeft: 8 },
   button: { backgroundColor: colors.onDarkSoft, borderRadius: radius.lg, paddingVertical: 16, width: '100%', alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 6 },
   buttonDisabled: { opacity: 0.55 },
-  buttonText: { color: colors.burgundy, fontSize: 16, fontWeight: '700', letterSpacing: 1 },
-  footer: { color: colors.onDarkMuted, fontSize: 11, letterSpacing: 1.6, marginTop: 16 },
+  buttonText: { color: colors.burgundy, fontSize: 16, fontFamily: fonts.sansBold, letterSpacing: 1 },
+  footer: { color: colors.onDarkMuted, fontFamily: fonts.sans, fontSize: 11, letterSpacing: 1.6, marginTop: 16 },
 });

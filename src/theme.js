@@ -1,11 +1,24 @@
-import { Platform } from 'react-native';
-
-// Two families only: a serif for names, headings and display text, and the platform
-// sans-serif (San Francisco / Roboto) for everything else. iOS has no font literally
-// named "serif"; it silently falls back to San Francisco, hence Georgia there.
+// Two families, loaded in App.js with expo-font so every phone renders them identically:
+// Playfair Display for names, headings and display text; Manrope for everything else.
+// Custom fonts must be referenced by their exact face (weight) name: pairing a family
+// with a fontWeight it does not have makes iOS silently fall back to San Francisco.
 export const fonts = {
-  serif: Platform.select({ ios: 'Georgia', default: 'serif' }),
-  sans: undefined, // platform default
+  serif: 'PlayfairDisplay_700Bold',
+  serifItalic: 'PlayfairDisplay_400Regular_Italic',
+  sans: 'Manrope_400Regular',
+  sansMedium: 'Manrope_500Medium',
+  sansSemi: 'Manrope_600SemiBold',
+  sansBold: 'Manrope_700Bold',
+};
+
+/** The font map handed to useFonts(); keys must match the names above. */
+export const fontAssets = {
+  PlayfairDisplay_700Bold: require('@expo-google-fonts/playfair-display/700Bold/PlayfairDisplay_700Bold.ttf'),
+  PlayfairDisplay_400Regular_Italic: require('@expo-google-fonts/playfair-display/400Regular_Italic/PlayfairDisplay_400Regular_Italic.ttf'),
+  Manrope_400Regular: require('@expo-google-fonts/manrope/400Regular/Manrope_400Regular.ttf'),
+  Manrope_500Medium: require('@expo-google-fonts/manrope/500Medium/Manrope_500Medium.ttf'),
+  Manrope_600SemiBold: require('@expo-google-fonts/manrope/600SemiBold/Manrope_600SemiBold.ttf'),
+  Manrope_700Bold: require('@expo-google-fonts/manrope/700Bold/Manrope_700Bold.ttf'),
 };
 
 export const colors = {
@@ -69,20 +82,20 @@ export const touch = { min: 44 };
 // Serif from 18 up (h3 and larger), sans below. Spread these into styles and override
 // only colour when the text sits on a dark background.
 export const type = {
-  display:    { fontFamily: fonts.serif, fontSize: 36, lineHeight: 42, fontWeight: '700', color: colors.burgundy },
-  h1:         { fontFamily: fonts.serif, fontSize: 28, lineHeight: 34, fontWeight: '700', color: colors.burgundy },
-  h2:         { fontFamily: fonts.serif, fontSize: 22, lineHeight: 28, fontWeight: '700', color: colors.burgundy },
-  h3:         { fontFamily: fonts.serif, fontSize: 18, lineHeight: 24, fontWeight: '700', color: colors.burgundy },
-  title:      { fontSize: 16, lineHeight: 22, fontWeight: '700', color: colors.textStrong },
-  body:       { fontSize: 15, lineHeight: 22, fontWeight: '400', color: colors.text },
-  bodyStrong: { fontSize: 15, lineHeight: 22, fontWeight: '600', color: colors.textStrong },
-  small:      { fontSize: 13, lineHeight: 18, fontWeight: '400', color: colors.text },
-  smallStrong:{ fontSize: 13, lineHeight: 18, fontWeight: '600', color: colors.textStrong },
-  caption:    { fontSize: 12, lineHeight: 16, fontWeight: '600', color: colors.muted },
-  kicker:     { fontSize: 11, lineHeight: 14, fontWeight: '700', letterSpacing: 1.2, textTransform: 'uppercase', color: colors.rose },
-  micro:      { fontSize: 10, lineHeight: 12, fontWeight: '700', color: colors.muted },
-  button:     { fontSize: 15, lineHeight: 20, fontWeight: '700' },
-  buttonSmall:{ fontSize: 13, lineHeight: 18, fontWeight: '700' },
+  display:    { fontFamily: fonts.serif, fontSize: 36, lineHeight: 42, color: colors.burgundy },
+  h1:         { fontFamily: fonts.serif, fontSize: 28, lineHeight: 34, color: colors.burgundy },
+  h2:         { fontFamily: fonts.serif, fontSize: 22, lineHeight: 28, color: colors.burgundy },
+  h3:         { fontFamily: fonts.serif, fontSize: 18, lineHeight: 24, color: colors.burgundy },
+  title:      { fontFamily: fonts.sansBold, fontSize: 16, lineHeight: 22, color: colors.textStrong },
+  body:       { fontFamily: fonts.sans, fontSize: 15, lineHeight: 22, color: colors.text },
+  bodyStrong: { fontFamily: fonts.sansSemi, fontSize: 15, lineHeight: 22, color: colors.textStrong },
+  small:      { fontFamily: fonts.sans, fontSize: 13, lineHeight: 18, color: colors.text },
+  smallStrong:{ fontFamily: fonts.sansSemi, fontSize: 13, lineHeight: 18, color: colors.textStrong },
+  caption:    { fontFamily: fonts.sansSemi, fontSize: 12, lineHeight: 16, color: colors.muted },
+  kicker:     { fontFamily: fonts.sansBold, fontSize: 11, lineHeight: 14, letterSpacing: 1.2, textTransform: 'uppercase', color: colors.rose },
+  micro:      { fontFamily: fonts.sansBold, fontSize: 10, lineHeight: 12, color: colors.muted },
+  button:     { fontFamily: fonts.sansBold, fontSize: 15, lineHeight: 20 },
+  buttonSmall:{ fontFamily: fonts.sansBold, fontSize: 13, lineHeight: 18 },
 };
 
 // Elevation tiers. Cards sit softly on the page; floating things (toast, nav) lift more.

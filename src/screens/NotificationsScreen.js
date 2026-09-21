@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from 'r
 import { Ionicons } from '@expo/vector-icons';
 import AppHeader from '../components/AppHeader';
 import { Button, EmptyState, Kicker, Rise } from '../components/ui';
-import { colors, radius, shadow, space, touch, type } from '../theme';
+import { colors, radius, shadow, space, touch, type, fonts } from '../theme';
 import { timeAgo } from '../notifications';
 
 const TONES = {
@@ -99,7 +99,7 @@ const s = StyleSheet.create({
   rowPressed: { backgroundColor: colors.blush },
   icon: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginRight: space.md },
   message: { ...type.small, color: colors.textStrong },
-  messageUnread: { fontWeight: '700' },
-  meta: { ...type.caption, fontWeight: '400', marginTop: space.xs },
+  messageUnread: { fontFamily: fonts.sansBold },
+  meta: { ...type.caption, fontFamily: fonts.sans, marginTop: space.xs },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.burgundy, marginLeft: space.md },
 });

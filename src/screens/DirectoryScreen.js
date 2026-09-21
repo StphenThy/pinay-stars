@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AppHeader from '../components/AppHeader';
 import ActressCard from '../components/ActressCard';
 import { Button, EmptyState, Kicker, ListStatus } from '../components/ui';
-import { colors, radius, shadow, space, statusMeta, touch, type } from '../theme';
+import { colors, radius, shadow, space, statusMeta, touch, type, fonts } from '../theme';
 import { DEFAULT_FILTERS, ERAS, SORTS, activeFilterCount, applyFilters, sortActresses } from '../data/actressModel';
 
 const PAGE_SIZE = 5;
@@ -177,5 +177,5 @@ const s = StyleSheet.create({
   ctaBody: { ...type.small, color: colors.onDarkSoft, marginTop: space.xs },
   suggest: { marginHorizontal: space.page, marginBottom: space.md, backgroundColor: colors.white, borderRadius: radius.lg, padding: space.lg, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: colors.line },
   suggestTitle: { ...type.bodyStrong, color: colors.burgundy },
-  suggestBody: { ...type.caption, fontWeight: '400', marginTop: space.xs, marginRight: space.md },
+  suggestBody: { ...type.caption, fontFamily: fonts.sans, marginTop: space.xs, marginRight: space.md },
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, radius, space, type } from '../theme';
+import { colors, radius, space, type, fonts } from '../theme';
 import { Avatar, Button } from './ui';
 
 export default function DeleteDialog({ actress, busy, onConfirm, onCancel }) {
@@ -44,11 +44,11 @@ const s = StyleSheet.create({
   iconWrap: { alignSelf: 'center', width: 56, height: 56, borderRadius: 28, backgroundColor: colors.dangerSoft, alignItems: 'center', justifyContent: 'center' },
   title: { ...type.h1, textAlign: 'center', marginTop: space.md },
   body: { ...type.body, textAlign: 'center', marginTop: space.sm },
-  strong: { fontWeight: '700', color: colors.textStrong },
+  strong: { fontFamily: fonts.sansBold, color: colors.textStrong },
   summary: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.blush, borderRadius: radius.md, padding: space.md, marginVertical: space.lg },
   avatar: { width: 56, height: 70, marginRight: space.md },
   name: { ...type.h3 },
   meta: { ...type.small, marginTop: 2 },
   id: { ...type.caption, color: colors.rose, marginTop: space.xs },
-  footnote: { ...type.caption, fontWeight: '400', textAlign: 'center', marginTop: space.md },
+  footnote: { ...type.caption, fontFamily: fonts.sans, textAlign: 'center', marginTop: space.md },
 });

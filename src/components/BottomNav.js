@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, radius, shadow, space, touch, type } from '../theme';
+import { colors, radius, shadow, space, touch, type, fonts } from '../theme';
 import { useAuth } from '../auth';
 
 const BASE_ITEMS = [
@@ -22,7 +23,7 @@ function Tab({ item, active, badge, warn, onPress }) {
 
   const bg = anim.interpolate({ inputRange: [0, 1], outputRange: ['rgba(101,0,29,0)', 'rgba(101,0,29,0.1)'] });
   const lift = anim.interpolate({ inputRange: [0, 1], outputRange: [0, -2] });
-  const scale = anim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.08] });
+  const scale = anim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.15] });
 
   return (
     <Pressable
@@ -45,11 +46,11 @@ function Tab({ item, active, badge, warn, onPress }) {
 
 export default function BottomNav({ active, onNavigate, favoriteCount, pendingCount }) {
   const { isAdmin } = useAuth();
+  const insets = useSafeAreaInsets();
   const items = [...BASE_ITEMS, isAdmin ? MANAGE_ITEM : SUGGEST_ITEM];
   return (
-    <View style={s.bar} accessibilityRole="tablist">
-      {/* Extends the bar colour down into the home-indicator safe area so no background shows beneath the tabs. */}
-      <View style={s.insetFill} />
+    // The bar extends into the home-indicator area in its own colour, sized per device.
+    <View style={[s.bar, { paddingBottom: Math.max(insets.bottom, space.sm) }]} accessibilityRole="tablist">
       {items.map(item => (
         <Tab
           key={item.key}
@@ -73,15 +74,13 @@ const s = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: colors.line,
     paddingTop: space.sm,
-    paddingBottom: Platform.OS === 'ios' ? space.xs : space.sm,
     ...shadow.float,
     shadowOffset: { width: 0, height: -4 },
   },
-  insetFill: { position: 'absolute', top: '100%', left: 0, right: 0, height: 60, backgroundColor: BAR_COLOR },
   item: { alignItems: 'center', minWidth: 72, minHeight: touch.min + 12, paddingVertical: 2 },
   iconPill: { width: 56, height: 34, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
-  label: { ...type.micro, fontSize: 11, lineHeight: 14, fontWeight: '600', marginTop: space.xs, letterSpacing: 0.2 },
-  labelActive: { color: colors.burgundy, fontWeight: '700' },
+  label: { ...type.micro, fontSize: 11, lineHeight: 14, fontFamily: fonts.sansSemi, marginTop: space.xs, letterSpacing: 0.2 },
+  labelActive: { color: colors.burgundy, fontFamily: fonts.sansBold },
   badge: { position: 'absolute', top: 2, right: 6, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: colors.burgundy, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.xs, borderWidth: 2, borderColor: BAR_COLOR },
   badgeWarn: { backgroundColor: colors.warning },
   badgeText: { ...type.micro, color: colors.white },

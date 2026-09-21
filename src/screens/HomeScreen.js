@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AppHeader from '../components/AppHeader';
 import ActressCard from '../components/ActressCard';
 import { Avatar, Button, Chip, EmptyState, IconButton, Kicker, ListStatus, Rise, SectionHeader, Tag } from '../components/ui';
-import { colors, radius, shadow, space, touch, type } from '../theme';
+import { colors, radius, shadow, space, touch, type, fonts } from '../theme';
 import { matchesQuery, sortActresses } from '../data/actressModel';
 import { useAuth } from '../auth';
 import PressScale from '../components/PressScale';
@@ -205,7 +205,7 @@ const s = StyleSheet.create({
   recentRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: space.md, borderBottomWidth: 1, borderColor: colors.line },
   recentAvatar: { width: 56, height: 70, marginRight: space.md },
   recentName: { ...type.h3 },
-  recentAward: { ...type.caption, fontWeight: '400', marginTop: 2 },
+  recentAward: { ...type.caption, fontFamily: fonts.sans, marginTop: 2 },
   recentTags: { flexDirection: 'row', flexWrap: 'wrap', marginTop: space.sm },
   chevron: { marginLeft: space.sm },
   registry: { marginHorizontal: space.page, marginTop: space.xxl, backgroundColor: colors.burgundy, borderRadius: radius.lg, padding: space.lg, flexDirection: 'row', alignItems: 'center' },
@@ -213,6 +213,6 @@ const s = StyleSheet.create({
   registryTitle: { ...type.bodyStrong, color: colors.white },
   registryMeta: { ...type.caption, color: colors.onDarkSoft, marginTop: space.xs },
   footer: { alignItems: 'center', paddingHorizontal: space.xxxl, paddingTop: space.xxxl, paddingBottom: space.md },
-  quote: { ...type.body, fontFamily: type.h3.fontFamily, fontStyle: 'italic', color: colors.burgundy, fontSize: 16, lineHeight: 24, textAlign: 'center' },
+  quote: { ...type.body, fontFamily: fonts.serifItalic, color: colors.burgundy, fontSize: 16, lineHeight: 24, textAlign: 'center' },
   cities: { ...type.kicker, marginTop: space.md },
 });

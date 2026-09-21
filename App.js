@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { BackHandler, Platform, SafeAreaView, StatusBar, StyleSheet, View } from 'react-native';
+import { BackHandler, Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { useFonts } from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { actressApi, authApi, notificationApi, setAuthToken, AuthError } from './src/api';
 import { normalizeActresses } from './src/data/sampleActresses';
 import { DEFAULT_FILTERS, formFromActress, toPayload } from './src/data/actressModel';
-import { colors } from './src/theme';
+import { colors, fontAssets } from './src/theme';
 import IntroScreen from './src/screens/IntroScreen';
 import EntryScreen from './src/screens/EntryScreen';
 import HomeScreen from './src/screens/HomeScreen';
@@ -20,6 +22,7 @@ import AccountScreen from './src/screens/AccountScreen';
 import BottomNav from './src/components/BottomNav';
 import Toast from './src/components/Toast';
 import DeleteDialog from './src/components/DeleteDialog';
+import ScreenTransition from './src/components/ScreenTransition';
 import { NotificationContext } from './src/notifications';
 import { AuthContext } from './src/auth';
 import { clearSession, loadSession, patchSession, saveSession } from './src/session';
@@ -30,7 +33,19 @@ const NOTIFICATIONS_KEY = 'pinay-stars:notifications';
 const NOTIFICATION_LIMIT = 50;
 const TABS = ['home', 'directory', 'favorites', 'manage'];
 
+// Fonts load once at the root; until then the brand backdrop shows so nothing renders in a
+// fallback typeface. Safe-area insets come from the provider so every screen can pad for
+// notches and home indicators on any device.
 export default function App() {
+  const [fontsReady] = useFonts(fontAssets);
+  return (
+    <SafeAreaProvider>
+      {fontsReady ? <PinayStars /> : <View style={s.splash} />}
+    </SafeAreaProvider>
+  );
+}
+
+function PinayStars() {
   const [intro, setIntro] = useState(true);
   const [entered, setEntered] = useState(false);
   const [ready, setReady] = useState(false);
@@ -584,9 +599,14 @@ export default function App() {
     <AuthContext.Provider value={authContext}>
     <NotificationContext.Provider value={notificationContext}>
       <Frame>
-        <SafeAreaView style={s.app}>
+        {/* The tab bar pads for the home indicator itself; without it the safe area does. */}
+        <SafeAreaView style={s.app} edges={showNav ? ['top', 'left', 'right'] : ['top', 'left', 'right', 'bottom']}>
           <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
-          <View style={{ flex: 1 }}>{screen}</View>
+          <View style={{ flex: 1 }}>
+            <ScreenTransition key={`${current.name}:${current.params?.id ?? ''}:${current.params?.mode ?? ''}`} pushed={stack.length > 1}>
+              {screen}
+            </ScreenTransition>
+          </View>
           {showNav ? <BottomNav active={tabActive} onNavigate={navigate} favoriteCount={favorites.length} pendingCount={pendingCount} /> : null}
 
           <FiltersScreen
@@ -617,7 +637,8 @@ function Frame({ children }) {
 }
 
 const s = StyleSheet.create({
-  app: { flex: 1, backgroundColor: colors.background, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 },
+  app: { flex: 1, backgroundColor: colors.background },
+  splash: { flex: 1, backgroundColor: '#4A0015' },
   webBackdrop: { flex: 1, backgroundColor: '#3B0012', alignItems: 'center' },
   webColumn: { flex: 1, width: '100%', maxWidth: 520, backgroundColor: colors.background },
 });
