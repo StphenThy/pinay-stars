@@ -1,4 +1,8 @@
-// Public API host. The data API is the PHP endpoint below.
+  // Only 401 (no valid session) is an AuthError, which signs the user out. 403 means the
+  // account is fine but lacks the role, so it surfaces as an ordinary message.
+  if (response.status === 401) {
+    throw new AuthError(body?.error || 'Sign in required.');
+  }// Public API host. The data API is the PHP endpoint below.
 export const API_BASE_URL = 'http://stephen123.mooo.com';
 
 const REQUEST_TIMEOUT_MS = 12000;

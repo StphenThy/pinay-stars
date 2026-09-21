@@ -333,6 +333,20 @@ function review_payload($mysqli, $table, $reviewsTable, $userTable, $actressId, 
 $account = current_account($mysqli, $SECRET);
 $isAdmin = $account !== null && $account['role'] === 'admin';
 $isUser  = $account !== null && $account['role'] === 'user';
+
+/**
+ * 401 means "no valid session" and makes the app sign the user out; 403 means
+ * "signed in, but this role may not do that" and is shown as a plain error.
+ */
+function deny($account, $message) {
+    fail($message, $account ? 403 : 401);
+}
+function require_admin($account, $isAdmin) {
+    if (!$isAdmin) { deny($account, $account ? 'Administrator access required.' : 'Admin login required.'); }
+}
+function require_member($account, $isUser, $message) {
+    if (!$isUser) { deny($account, $message); }
+}
 $action  = isset($_GET['action']) ? strtolower(trim($_GET['action'])) : '';
 
 if ($action === 'reviews') {
@@ -352,7 +366,7 @@ if ($action === 'reviews') {
     }
 
     if ($method === 'PUT') {
-        if (!$isUser) { fail('Sign in as a member to rate.', 401); }
+        require_member($account, $isUser, $account ? 'Only members can rate. Administrators moderate reviews instead.' : 'Sign in as a member to rate.');
         $body    = json_body();
         $rating  = isset($body['rating']) ? (int) $body['rating'] : 0;
         $comment = isset($body['comment']) ? trim((string) $body['comment']) : '';
@@ -540,7 +554,7 @@ if ($action === 'favorites' && $method === 'PUT') {
 
 // A member's own submissions, whatever their status, so they can see what is pending.
 if ($action === 'mine' && $method === 'GET') {
-    if (!$isUser) { fail('Sign in required.', 401); }
+    require_member($account, $isUser, $account ? 'Only member accounts have suggestions.' : 'Sign in required.');
     $stmt = $mysqli->prepare("SELECT * FROM `$TABLE` WHERE submitted_by = ? ORDER BY created_at DESC");
     $stmt->bind_param('i', $account['id']);
     $stmt->execute();
@@ -628,7 +642,7 @@ if ($method === 'POST') {
 
 // ---------------------------------------------------------------- UPDATE
 if ($method === 'PUT') {
-    if (!$isAdmin) { fail('Admin login required.', 401); }
+    require_admin($account, $isAdmin);
     $id = record_id();
     if ($id <= 0) {
         fail('A record id is required to update.', 422);
@@ -691,7 +705,7 @@ if ($method === 'PUT') {
 
 // ---------------------------------------------------------------- DELETE
 if ($method === 'DELETE') {
-    if (!$isAdmin) { fail('Admin login required.', 401); }
+    require_admin($account, $isAdmin);
     $id = record_id();
     if ($id <= 0) {
         fail('A record id is required to delete.', 422);
