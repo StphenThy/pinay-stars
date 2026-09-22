@@ -54,7 +54,7 @@ export default function HomeScreen({ actresses, query, setQuery, category, setCa
       <View style={s.headingRow}>
         <View style={{ flex: 1 }}>
           <Kicker>EDITORIAL SHOWCASE</Kicker>
-          <Text style={s.hero} accessibilityRole="header">Discover Filipina{'\n'}Talent</Text>
+          <Text style={s.hero} accessibilityRole="header">Discover{'\n'}Filipina Talent</Text>
         </View>
         <View style={s.countPill} accessible accessibilityLabel={`${actresses.length} stars in the registry`}>
           <Text style={s.countValue}>{actresses.length}</Text>
@@ -189,13 +189,14 @@ export default function HomeScreen({ actresses, query, setQuery, category, setCa
 const s = StyleSheet.create({
   page: { paddingBottom: space.xxxl },
   headingRow: { paddingHorizontal: space.page, flexDirection: 'row', alignItems: 'center' },
-  hero: { ...type.display, marginTop: space.sm },
-  countPill: { backgroundColor: colors.blushDeep, borderRadius: radius.lg, paddingHorizontal: space.lg, paddingVertical: space.md, alignItems: 'center', minWidth: 72 },
+  // Two lines beside the count pill: 36pt wraps "Filipina" onto its own line and leaves the pill floating.
+  hero: { ...type.display, fontSize: 28, lineHeight: 34, marginTop: space.xs },
+  countPill: { backgroundColor: colors.blushDeep, borderRadius: radius.lg, paddingHorizontal: space.md, paddingVertical: space.sm, alignItems: 'center', minWidth: 64, marginLeft: space.md },
   countValue: { ...type.h2 },
   countLabel: { ...type.kicker },
-  search: { marginHorizontal: space.page, marginTop: space.xl, height: 56, backgroundColor: colors.white, borderRadius: radius.lg, flexDirection: 'row', alignItems: 'center', paddingLeft: space.lg, paddingRight: space.sm, ...shadow.card },
+  search: { marginHorizontal: space.page, marginTop: space.lg, height: 52, backgroundColor: colors.white, borderRadius: radius.lg, flexDirection: 'row', alignItems: 'center', paddingLeft: space.lg, paddingRight: space.sm, ...shadow.card },
   input: { ...type.body, color: colors.textStrong, flex: 1, marginLeft: space.sm, minHeight: touch.min },
-  chips: { paddingHorizontal: space.page, paddingVertical: space.lg },
+  chips: { paddingHorizontal: space.page, paddingVertical: space.md },
   carousel: { paddingHorizontal: space.page },
   dots: { flexDirection: 'row', justifyContent: 'center', marginTop: space.md, marginBottom: space.xxl },
   dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.line, marginHorizontal: space.xs },

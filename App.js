@@ -160,16 +160,24 @@ function PinayStars() {
     } catch { return []; }
   }, []);
 
+  // Search, category and filters belong to whoever is browsing; a new person starts clean.
+  const resetBrowsing = useCallback(() => {
+    setQuery('');
+    setCategory('All Talents');
+    setFilters(DEFAULT_FILTERS);
+  }, []);
+
   const signOut = useCallback(async (message, tone = 'info') => {
     setAuthToken('');
     setAccount(null);
     accountRef.current = null;
     clearSession();
+    resetBrowsing();
     setFavoriteIds(await loadDeviceFavorites());
     setNotifications(await loadGuestNotifications());
     setStack(st => (st.some(f => ['manage', 'form', 'account'].includes(f.name)) ? [{ name: 'home' }] : st));
     if (message) showToast(tone, message);
-  }, [showToast, loadDeviceFavorites, loadGuestNotifications]);
+  }, [showToast, loadDeviceFavorites, loadGuestNotifications, resetBrowsing]);
 
   // Restore a saved session first so the initial load returns pending submissions for admins.
   useEffect(() => {
@@ -267,6 +275,7 @@ function PinayStars() {
     setAccount(result.account);
     accountRef.current = result.account;
     setEntered(true);
+    resetBrowsing();
     let favorites = [];
     try {
       favorites = (await authApi.getFavorites()).ids.map(String);
@@ -470,6 +479,7 @@ function PinayStars() {
     return (
       <Frame>
         <EntryScreen
+          actresses={actresses}
           onSignIn={() => setStack([{ name: 'home' }, { name: 'login', params: { mode: 'login' } }])}
           onRegister={() => setStack([{ name: 'home' }, { name: 'login', params: { mode: 'register' } }])}
           onGuest={() => setEntered(true)}
