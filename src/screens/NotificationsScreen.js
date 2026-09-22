@@ -3,14 +3,15 @@ import { Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from 'r
 import { Ionicons } from '@expo/vector-icons';
 import AppHeader from '../components/AppHeader';
 import { Button, EmptyState, Kicker, Rise } from '../components/ui';
-import { colors, radius, shadow, space, touch, type, fonts } from '../theme';
+import { radius, space, touch, fonts } from '../theme';
+import { useTheme, useThemedStyles } from '../theme-context';
 import { timeAgo } from '../notifications';
 
-const TONES = {
+const tonesFor = colors => ({
   success: { icon: 'checkmark', bg: colors.successSoft, fg: colors.success, label: 'Success' },
   error: { icon: 'alert', bg: colors.dangerSoft, fg: colors.danger, label: 'Error' },
   info: { icon: 'sparkles', bg: colors.blush, fg: colors.burgundy, label: 'Update' },
-};
+});
 
 function groupLabel(stamp) {
   const d = new Date(stamp);
@@ -23,6 +24,9 @@ function groupLabel(stamp) {
 }
 
 export default function NotificationsScreen({ notifications, onBack, onOpenActress, onMarkAllRead, onClear, onRefresh, refreshing }) {
+  const { colors } = useTheme();
+  const s = useThemedStyles(makeStyles);
+  const tones = tonesFor(colors);
   const unread = notifications.filter(n => !n.read).length;
   const groups = notifications.reduce((acc, n) => {
     const key = groupLabel(n.time);
@@ -52,7 +56,7 @@ export default function NotificationsScreen({ notifications, onBack, onOpenActre
           <Text style={s.group}>{label}</Text>
           <View style={s.card}>
             {items.map((n, i) => {
-              const tone = TONES[n.tone] || TONES.info;
+              const tone = tones[n.tone] || tones.info;
               const openable = n.actressId !== undefined;
               return (
                 <Pressable
@@ -85,14 +89,14 @@ export default function NotificationsScreen({ notifications, onBack, onOpenActre
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = ({ colors, type, shadow }) => StyleSheet.create({
   page: { paddingBottom: space.xxxl },
   heading: { paddingHorizontal: space.page, paddingTop: space.xs },
   title: { ...type.h1, marginTop: space.sm },
   sub: { ...type.small, marginTop: space.xs },
   actions: { flexDirection: 'row', marginHorizontal: space.page, marginTop: space.md },
   group: { ...type.kicker, marginHorizontal: space.page, marginTop: space.xl, marginBottom: space.sm },
-  card: { marginHorizontal: space.page, backgroundColor: colors.white, borderRadius: radius.lg, overflow: 'hidden', ...shadow.card },
+  card: { marginHorizontal: space.page, backgroundColor: colors.surface, borderRadius: radius.lg, overflow: 'hidden', ...shadow.card },
   row: { flexDirection: 'row', alignItems: 'center', padding: space.md, minHeight: touch.min + 12 },
   rowBorder: { borderBottomWidth: 1, borderColor: colors.line },
   rowUnread: { backgroundColor: colors.background },

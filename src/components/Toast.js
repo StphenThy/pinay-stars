@@ -1,15 +1,20 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, radius, shadow, space, type } from '../theme';
+import { radius, space } from '../theme';
+import { useTheme, useThemedStyles } from '../theme-context';
 
-const TONES = {
+// The dot behind the icon is a filled disc with white on it, so it uses the fill
+// colours rather than the ones the same words are written in.
+const tonesFor = colors => ({
   success: { bg: colors.success, icon: 'checkmark' },
-  error: { bg: colors.danger, icon: 'alert' },
-  info: { bg: colors.burgundy, icon: 'sparkles' },
-};
+  error: { bg: colors.dangerFill, icon: 'alert' },
+  info: { bg: colors.primary, icon: 'sparkles' },
+});
 
 export default function Toast({ toast, onDismiss, onPress }) {
+  const { colors } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const slide = useRef(new Animated.Value(-60)).current;
 
   useEffect(() => {
@@ -23,7 +28,8 @@ export default function Toast({ toast, onDismiss, onPress }) {
   }, [toast, onDismiss, slide]);
 
   if (!toast) return null;
-  const tone = TONES[toast.tone] || TONES.info;
+  const tones = tonesFor(colors);
+  const tone = tones[toast.tone] || tones.info;
 
   return (
     <Animated.View pointerEvents="box-none" style={[s.wrap, { transform: [{ translateY: slide }] }]}>
@@ -42,9 +48,9 @@ export default function Toast({ toast, onDismiss, onPress }) {
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = ({ colors, type, shadow }) => StyleSheet.create({
   wrap: { position: 'absolute', top: space.sm, left: 0, right: 0, alignItems: 'center', zIndex: 50 },
-  pill: { flexDirection: 'row', alignItems: 'center', maxWidth: '88%', minHeight: 44, backgroundColor: colors.white, borderRadius: radius.pill, paddingVertical: space.sm, paddingLeft: space.sm, paddingRight: space.md, borderWidth: 1, borderColor: colors.line, ...shadow.float },
+  pill: { flexDirection: 'row', alignItems: 'center', maxWidth: '88%', minHeight: 44, backgroundColor: colors.surface, borderRadius: radius.pill, paddingVertical: space.sm, paddingLeft: space.sm, paddingRight: space.md, borderWidth: 1, borderColor: colors.line, ...shadow.float },
   icon: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center', marginRight: space.sm },
   text: { ...type.smallStrong, flexShrink: 1 },
   chevron: { marginLeft: space.sm },

@@ -4,12 +4,15 @@ import { Ionicons } from '@expo/vector-icons';
 import AppHeader from '../components/AppHeader';
 import ActressCard from '../components/ActressCard';
 import { Button, EmptyState, Kicker, ListStatus } from '../components/ui';
-import { colors, radius, shadow, space, statusMeta, touch, type, fonts } from '../theme';
+import { radius, space, touch, fonts } from '../theme';
+import { useTheme, useThemedStyles } from '../theme-context';
 import { DEFAULT_FILTERS, ERAS, SORTS, activeFilterCount, applyFilters, sortActresses } from '../data/actressModel';
 
 const PAGE_SIZE = 5;
 
 export default function DirectoryScreen({ actresses, query, setQuery, filters, setFilters, favorites, onFavorite, onProfile, onOpenFilters, onSuggest, onRefresh, refreshing, loading, loadError, onRetry }) {
+  const { colors, statusMeta } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const [visible, setVisible] = useState(PAGE_SIZE);
 
   const results = useMemo(
@@ -146,19 +149,19 @@ export default function DirectoryScreen({ actresses, query, setQuery, filters, s
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = ({ colors, type, shadow }) => StyleSheet.create({
   page: { paddingBottom: space.xxxl },
   heading: { paddingHorizontal: space.page, paddingTop: space.xs },
   headingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: space.sm },
   title: { ...type.h1 },
   count: { backgroundColor: colors.blushDeep, borderRadius: radius.pill, paddingHorizontal: space.md, paddingVertical: space.sm },
   countText: { ...type.smallStrong, color: colors.burgundy },
-  search: { height: 56, marginHorizontal: space.page, marginTop: space.lg, backgroundColor: colors.white, borderRadius: radius.lg, flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.lg, ...shadow.card },
+  search: { height: 56, marginHorizontal: space.page, marginTop: space.lg, backgroundColor: colors.surface, borderRadius: radius.lg, flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.lg, ...shadow.card },
   input: { ...type.body, color: colors.textStrong, flex: 1, marginLeft: space.sm, minHeight: touch.min },
   clear: { width: touch.min - 8, height: touch.min - 8, alignItems: 'center', justifyContent: 'center', marginRight: -space.sm },
   toolbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: space.page, marginTop: space.md },
-  filtersButton: { flexDirection: 'row', alignItems: 'center', minHeight: touch.min - 4, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line, borderRadius: radius.pill, paddingVertical: space.sm, paddingHorizontal: space.md },
-  filtersButtonActive: { backgroundColor: colors.burgundy, borderColor: colors.burgundy },
+  filtersButton: { flexDirection: 'row', alignItems: 'center', minHeight: touch.min - 4, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, borderRadius: radius.pill, paddingVertical: space.sm, paddingHorizontal: space.md },
+  filtersButtonActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   filtersText: { ...type.smallStrong },
   filtersTextActive: { color: colors.white },
   badge: { marginLeft: space.sm, minWidth: 20, height: 20, borderRadius: 10, backgroundColor: colors.gold, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.xs },
@@ -172,10 +175,10 @@ const s = StyleSheet.create({
   resetText: { ...type.caption, color: colors.rose, textDecorationLine: 'underline' },
   pager: { alignItems: 'center', marginHorizontal: space.page, marginTop: space.xs, marginBottom: space.sm },
   pagerText: { ...type.small },
-  cta: { margin: space.page, backgroundColor: colors.burgundy, borderRadius: radius.lg, padding: space.lg, flexDirection: 'row', alignItems: 'center' },
+  cta: { margin: space.page, backgroundColor: colors.primary, borderRadius: radius.lg, padding: space.lg, flexDirection: 'row', alignItems: 'center' },
   ctaTitle: { ...type.title, color: colors.white },
   ctaBody: { ...type.small, color: colors.onDarkSoft, marginTop: space.xs },
-  suggest: { marginHorizontal: space.page, marginBottom: space.md, backgroundColor: colors.white, borderRadius: radius.lg, padding: space.lg, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: colors.line },
+  suggest: { marginHorizontal: space.page, marginBottom: space.md, backgroundColor: colors.surface, borderRadius: radius.lg, padding: space.lg, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: colors.line },
   suggestTitle: { ...type.bodyStrong, color: colors.burgundy },
   suggestBody: { ...type.caption, fontFamily: fonts.sans, marginTop: space.xs, marginRight: space.md },
 });

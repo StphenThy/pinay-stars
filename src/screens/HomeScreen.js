@@ -4,7 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import AppHeader from '../components/AppHeader';
 import ActressCard from '../components/ActressCard';
 import { Avatar, Button, Chip, EmptyState, IconButton, Kicker, ListStatus, Rise, SectionHeader, Tag } from '../components/ui';
-import { colors, radius, shadow, space, touch, type, fonts } from '../theme';
+import { radius, space, touch, fonts } from '../theme';
+import { useTheme, useThemedStyles } from '../theme-context';
 import { matchesQuery, sortActresses } from '../data/actressModel';
 import { useAuth } from '../auth';
 import PressScale from '../components/PressScale';
@@ -21,6 +22,8 @@ function inCategory(a, category) {
 }
 
 export default function HomeScreen({ actresses, query, setQuery, category, setCategory, favorites, onFavorite, onNavigate, onProfile, source, onRefresh, refreshing, loading, loadError, onRetry }) {
+  const { colors } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const [page, setPage] = useState(0);
   const carousel = useRef(null);
   // Drives the parallax on the featured portraits; native-driven so it never drops frames.
@@ -186,7 +189,7 @@ export default function HomeScreen({ actresses, query, setQuery, category, setCa
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = ({ colors, type, shadow }) => StyleSheet.create({
   page: { paddingBottom: space.xxxl },
   headingRow: { paddingHorizontal: space.page, flexDirection: 'row', alignItems: 'center' },
   // Two lines beside the count pill: 36pt wraps "Filipina" onto its own line and leaves the pill floating.
@@ -194,7 +197,7 @@ const s = StyleSheet.create({
   countPill: { backgroundColor: colors.blushDeep, borderRadius: radius.lg, paddingHorizontal: space.md, paddingVertical: space.sm, alignItems: 'center', minWidth: 64, marginLeft: space.md },
   countValue: { ...type.h2 },
   countLabel: { ...type.kicker },
-  search: { marginHorizontal: space.page, marginTop: space.lg, height: 52, backgroundColor: colors.white, borderRadius: radius.lg, flexDirection: 'row', alignItems: 'center', paddingLeft: space.lg, paddingRight: space.sm, ...shadow.card },
+  search: { marginHorizontal: space.page, marginTop: space.lg, height: 52, backgroundColor: colors.surface, borderRadius: radius.lg, flexDirection: 'row', alignItems: 'center', paddingLeft: space.lg, paddingRight: space.sm, ...shadow.card },
   input: { ...type.body, color: colors.textStrong, flex: 1, marginLeft: space.sm, minHeight: touch.min },
   chips: { paddingHorizontal: space.page, paddingVertical: space.md },
   carousel: { paddingHorizontal: space.page },
@@ -202,14 +205,14 @@ const s = StyleSheet.create({
   dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.line, marginHorizontal: space.xs },
   dotActive: { backgroundColor: colors.burgundy, width: 20 },
   horizontal: { paddingHorizontal: space.page, paddingBottom: space.xxl },
-  recentList: { marginHorizontal: space.page, backgroundColor: colors.white, borderRadius: radius.lg, paddingHorizontal: space.md, ...shadow.card },
+  recentList: { marginHorizontal: space.page, backgroundColor: colors.surface, borderRadius: radius.lg, paddingHorizontal: space.md, ...shadow.card },
   recentRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: space.md, borderBottomWidth: 1, borderColor: colors.line },
   recentAvatar: { width: 56, height: 70, marginRight: space.md },
   recentName: { ...type.h3 },
   recentAward: { ...type.caption, fontFamily: fonts.sans, marginTop: 2 },
   recentTags: { flexDirection: 'row', flexWrap: 'wrap', marginTop: space.sm },
   chevron: { marginLeft: space.sm },
-  registry: { marginHorizontal: space.page, marginTop: space.xxl, backgroundColor: colors.burgundy, borderRadius: radius.lg, padding: space.lg, flexDirection: 'row', alignItems: 'center' },
+  registry: { marginHorizontal: space.page, marginTop: space.xxl, backgroundColor: colors.primary, borderRadius: radius.lg, padding: space.lg, flexDirection: 'row', alignItems: 'center' },
   registryIcon: { width: touch.min, height: touch.min, borderRadius: touch.min / 2, backgroundColor: colors.onDarkFill, alignItems: 'center', justifyContent: 'center', marginRight: space.md },
   registryTitle: { ...type.bodyStrong, color: colors.white },
   registryMeta: { ...type.caption, color: colors.onDarkSoft, marginTop: space.xs },

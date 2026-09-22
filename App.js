@@ -6,7 +6,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { actressApi, authApi, notificationApi, setAuthToken, AuthError } from './src/api';
 import { normalizeActresses } from './src/data/sampleActresses';
 import { DEFAULT_FILTERS, formFromActress, toPayload } from './src/data/actressModel';
-import { colors, fontAssets } from './src/theme';
+import { fontAssets } from './src/theme';
+import { ThemeProvider, useTheme, useThemedStyles } from './src/theme-context';
 import IntroScreen from './src/screens/IntroScreen';
 import EntryScreen from './src/screens/EntryScreen';
 import HomeScreen from './src/screens/HomeScreen';
@@ -35,17 +36,29 @@ const TABS = ['home', 'directory', 'favorites', 'manage'];
 
 // Fonts load once at the root; until then the brand backdrop shows so nothing renders in a
 // fallback typeface. Safe-area insets come from the provider so every screen can pad for
-// notches and home indicators on any device.
+// notches and home indicators on any device, and ThemeProvider sits above everything so
+// the day / night choice reaches each screen's styles.
 export default function App() {
   const [fontsReady] = useFonts(fontAssets);
   return (
     <SafeAreaProvider>
-      {fontsReady ? <PinayStars /> : <View style={s.splash} />}
+      <ThemeProvider>
+        {fontsReady ? <PinayStars /> : <Splash />}
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
 
+// The hold-still frame before the fonts arrive: the brand backdrop of whichever theme is
+// about to load, so the first paint is never the wrong one.
+function Splash() {
+  const { gradients } = useTheme();
+  return <View style={{ flex: 1, backgroundColor: gradients.hero.colors[0] }} />;
+}
+
 function PinayStars() {
+  const { colors, isDark } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const [intro, setIntro] = useState(true);
   const [entered, setEntered] = useState(false);
   const [ready, setReady] = useState(false);
@@ -611,7 +624,7 @@ function PinayStars() {
       <Frame>
         {/* The tab bar pads for the home indicator itself; without it the safe area does. */}
         <SafeAreaView style={s.app} edges={showNav ? ['top', 'left', 'right'] : ['top', 'left', 'right', 'bottom']}>
-          <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
+          <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
           <View style={{ flex: 1 }}>
             <ScreenTransition key={`${current.name}:${current.params?.id ?? ''}:${current.params?.mode ?? ''}`} pushed={stack.length > 1}>
               {screen}
@@ -638,6 +651,7 @@ function PinayStars() {
 
 // On the web the app is phone-shaped, so centre it in a phone-width column on wide screens.
 function Frame({ children }) {
+  const s = useThemedStyles(makeStyles);
   if (Platform.OS !== 'web') return children;
   return (
     <View style={s.webBackdrop}>
@@ -646,9 +660,8 @@ function Frame({ children }) {
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = ({ colors, gradients }) => StyleSheet.create({
   app: { flex: 1, backgroundColor: colors.background },
-  splash: { flex: 1, backgroundColor: '#4A0015' },
-  webBackdrop: { flex: 1, backgroundColor: '#3B0012', alignItems: 'center' },
+  webBackdrop: { flex: 1, backgroundColor: gradients.hero.colors[2], alignItems: 'center' },
   webColumn: { flex: 1, width: '100%', maxWidth: 520, backgroundColor: colors.background },
 });

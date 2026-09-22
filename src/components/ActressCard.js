@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { colors, gradients, radius, shadow, space, statusMeta, type } from '../theme';
+import { radius, space } from '../theme';
+import { useTheme, useThemedStyles } from '../theme-context';
 import { formatBirthday, formatReviews, tenureLabel } from '../data/actressModel';
 import { Avatar, Button, HeartButton, StatusPill, Tag } from './ui';
 import { Chevron, Collapsible } from './Collapsible';
@@ -14,6 +15,8 @@ import { usePosters } from '../posters';
 const PARALLAX = 32; // px the portrait drifts against its frame while the carousel moves
 
 function FeaturedCard({ actress, featureLabel, favorite, onOpen, onToggle, parallax }) {
+  const { colors, gradients } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const [expanded, setExpanded] = useState(false);
   // Poster of her top film for the expanded footer; resolves lazily and is cached on device.
   const topFilm = actress.films[0];
@@ -73,6 +76,8 @@ function FeaturedCard({ actress, featureLabel, favorite, onOpen, onToggle, paral
 }
 
 export default function ActressCard({ actress, variant = 'list', onPress, onFavorite, favorite, featureLabel, onRemove, parallax }) {
+  const { colors, statusMeta } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const open = () => onPress && onPress(actress);
   const toggle = () => onFavorite && onFavorite(actress);
 
@@ -151,9 +156,9 @@ export default function ActressCard({ actress, variant = 'list', onPress, onFavo
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = ({ colors, type, shadow }) => StyleSheet.create({
   // List + favorite cards share one shell so the two screens look like the same product.
-  card: { backgroundColor: colors.white, borderRadius: radius.lg, padding: space.md, marginHorizontal: space.page, marginBottom: space.md, flexDirection: 'row', ...shadow.card },
+  card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: space.md, marginHorizontal: space.page, marginBottom: space.md, flexDirection: 'row', ...shadow.card },
   image: { width: 108, height: 150 },
   favImage: { width: 100, height: 140 },
   body: { flex: 1, paddingLeft: space.md },

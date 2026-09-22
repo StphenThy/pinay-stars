@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, radius, space, touch, type } from '../theme';
+import { radius, space, touch } from '../theme';
+import { useTheme, useThemedStyles } from '../theme-context';
 
 // Slides content open/closed. maxHeight is a generous upper bound, not the exact height.
 export function Collapsible({ open, maxHeight = 420, children }) {
@@ -17,6 +18,8 @@ export function Collapsible({ open, maxHeight = 420, children }) {
 }
 
 export function Chevron({ open, onPress, light, label }) {
+  const { colors } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const anim = useRef(new Animated.Value(open ? 1 : 0)).current;
   useEffect(() => {
     Animated.timing(anim, { toValue: open ? 1 : 0, duration: 220, useNativeDriver: true }).start();
@@ -32,8 +35,8 @@ export function Chevron({ open, onPress, light, label }) {
   );
 }
 
-const s = StyleSheet.create({
-  chevron: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-start', minHeight: 36, minWidth: 36, borderRadius: radius.pill, paddingVertical: space.xs, paddingHorizontal: space.md, backgroundColor: 'rgba(101,0,29,0.08)' },
+const makeStyles = ({ colors, type }) => StyleSheet.create({
+  chevron: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-start', minHeight: 36, minWidth: 36, borderRadius: radius.pill, paddingVertical: space.xs, paddingHorizontal: space.md, backgroundColor: colors.blush },
   chevronLight: { backgroundColor: 'rgba(255,255,255,0.18)' },
   chevronLabel: { ...type.caption, color: colors.burgundy, marginRight: space.xs },
   chevronLabelLight: { color: colors.white },

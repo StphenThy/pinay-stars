@@ -1,12 +1,15 @@
 import React from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, radius, space, touch, type } from '../theme';
+import { radius, space, touch } from '../theme';
+import { useTheme, useThemedStyles } from '../theme-context';
 import { useNotifications } from '../notifications';
 import { initialsOf, roleLabel, useAuth } from '../auth';
 import { IconButton } from './ui';
 
 export default function AppHeader({ section = 'HOME', onBack, backLabel, right }) {
+  const { colors } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const { unread, open } = useNotifications();
   const { account, isAdmin, openAccount } = useAuth();
   const accountLabel = account ? `Account: ${account.display_name || account.username}, ${roleLabel(account)}` : 'Sign in';
@@ -56,7 +59,7 @@ export default function AppHeader({ section = 'HOME', onBack, backLabel, right }
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = ({ colors, type }) => StyleSheet.create({
   nav: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.page, paddingTop: space.lg, paddingBottom: space.md },
   logo: { width: touch.min, height: touch.min, borderRadius: radius.sm, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center', marginRight: space.md, overflow: 'hidden', borderWidth: 1, borderColor: colors.line },
   logoImage: { width: touch.min, height: touch.min },
@@ -65,8 +68,8 @@ const s = StyleSheet.create({
   brand: { ...type.h2 },
   section: { ...type.kicker, marginTop: 2 },
   avatar: { width: touch.min, height: touch.min, borderRadius: touch.min / 2, marginLeft: space.sm, backgroundColor: colors.blushDeep, alignItems: 'center', justifyContent: 'center' },
-  avatarMember: { backgroundColor: colors.rose },
-  avatarAdmin: { backgroundColor: colors.burgundy },
+  avatarMember: { backgroundColor: colors.roseFill },
+  avatarAdmin: { backgroundColor: colors.primary },
   avatarImage: { width: touch.min, height: touch.min, borderRadius: touch.min / 2 },
   avatarText: { ...type.h3, color: colors.white },
   dot: { position: 'absolute', bottom: 0, right: 0, width: 12, height: 12, borderRadius: 6, backgroundColor: colors.info, borderWidth: 2, borderColor: colors.background },

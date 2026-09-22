@@ -6,7 +6,8 @@ import { Avatar, Button, HeartButton, IconButton, StatusPill, Tag } from '../com
 import { Chevron, Collapsible } from '../components/Collapsible';
 import StarRating from '../components/StarRating';
 import PosterRail from '../components/PosterRail';
-import { colors, fonts, gradients, radius, shadow, space, touch, type } from '../theme';
+import { fonts, radius, space, touch } from '../theme';
+import { useTheme, useThemedStyles } from '../theme-context';
 import { formatBirthday, formatReviews, tenureLabel } from '../data/actressModel';
 import { useAuth } from '../auth';
 import { reviewApi } from '../api';
@@ -14,6 +15,8 @@ import { timeAgo } from '../notifications';
 import { haptic } from '../haptics';
 
 function ReviewsSection({ actress, onRatingChange, onSignIn, onError }) {
+  const { colors } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const { account, isAdmin, isMember } = useAuth();
   const [data, setData] = useState(null);
   const [rating, setRating] = useState(0);
@@ -142,6 +145,7 @@ function ReviewsSection({ actress, onRatingChange, onSignIn, onError }) {
 }
 
 function Section({ title, children }) {
+  const s = useThemedStyles(makeStyles);
   return (
     <View style={s.section}>
       <Text style={s.sectionTitle}>{title}</Text>
@@ -151,6 +155,7 @@ function Section({ title, children }) {
 }
 
 function Metric({ value, label }) {
+  const s = useThemedStyles(makeStyles);
   return (
     <View style={s.metric}>
       <Text style={s.metricValue}>{value}</Text>
@@ -160,6 +165,7 @@ function Metric({ value, label }) {
 }
 
 function ListRows({ items, emptyText, sub }) {
+  const s = useThemedStyles(makeStyles);
   if (!items.length) return <Text style={s.emptyRow}>{emptyText}</Text>;
   return items.map((item, i) => (
     <View key={`${item}-${i}`} style={[s.listRow, i === items.length - 1 && { borderBottomWidth: 0 }]}>
@@ -170,6 +176,8 @@ function ListRows({ items, emptyText, sub }) {
 }
 
 export default function ProfileScreen({ actress, favorite, onBack, onFavorite, onEdit, onDelete, onApprove, onSignIn, onRatingChange, onError, onRefresh, refreshing }) {
+  const { colors, gradients } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const tenure = tenureLabel(actress.yearsActive);
   const [showDetails, setShowDetails] = useState(false);
   const { isAdmin } = useAuth();
@@ -312,7 +320,7 @@ export default function ProfileScreen({ actress, favorite, onBack, onFavorite, o
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = ({ colors, type, shadow }) => StyleSheet.create({
   page: { padding: 20, paddingBottom: 40 },
   top: { height: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   backRow: { flexDirection: 'row', alignItems: 'center', width: 84, minHeight: touch.min },
@@ -360,7 +368,7 @@ const s = StyleSheet.create({
   pendingBody: { color: colors.text, fontFamily: fonts.sans, fontSize: 13, lineHeight: 19, marginTop: 4 },
   signInHint: { alignItems: 'center', paddingVertical: 12 },
   signInHintText: { color: colors.rose, fontSize: 12, fontFamily: fonts.sansSemi },
-  section: { backgroundColor: colors.white, borderRadius: radius.lg, padding: 20, marginTop: 16, ...shadow.card },
+  section: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: 20, marginTop: 16, ...shadow.card },
   knownFor: { marginTop: 24 },
   tmdbNote: { ...type.caption, fontFamily: fonts.sans, marginTop: space.md },
   sectionTitle: { fontFamily: fonts.serif, fontSize: 22, color: colors.burgundy, marginBottom: 12 },

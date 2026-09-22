@@ -3,7 +3,8 @@ import { ActivityIndicator, Animated, Easing, Image, Pressable, StyleSheet, Text
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, fonts, radius, gradients } from '../theme';
+import { fonts, radius } from '../theme';
+import { useTheme, useThemedStyles } from '../theme-context';
 import { Avatar } from '../components/ui';
 
 const FACE = 64;
@@ -26,6 +27,7 @@ function useCountUp(target, go, duration = 900) {
 }
 
 function Stat({ value, label }) {
+  const s = useThemedStyles(makeStyles);
   return (
     <View style={s.stat}>
       <Text style={s.statValue}>{value}</Text>
@@ -35,6 +37,8 @@ function Stat({ value, label }) {
 }
 
 export default function IntroScreen({ ready, source, actresses = [], onStart }) {
+  const { colors, gradients } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const fade = useRef(new Animated.Value(0)).current;
@@ -152,7 +156,7 @@ export default function IntroScreen({ ready, source, actresses = [], onStart }) 
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = ({ colors }) => StyleSheet.create({
   page: { flex: 1, paddingHorizontal: 24, alignItems: 'center' },
   archive: { backgroundColor: colors.onDarkFill, borderRadius: radius.pill, paddingVertical: 12, paddingHorizontal: 16, borderWidth: 1, borderColor: colors.onDarkFillStrong },
   archiveText: { color: colors.onDarkSoft, fontSize: 11, fontFamily: fonts.sansBold, letterSpacing: 1.6, textAlign: 'center' },
@@ -179,6 +183,6 @@ const s = StyleSheet.create({
   statusText: { color: colors.onDarkSoft, fontSize: 12, fontFamily: fonts.sansBold, letterSpacing: 1.6, marginLeft: 8 },
   button: { backgroundColor: colors.onDarkSoft, borderRadius: radius.lg, paddingVertical: 16, width: '100%', alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 6 },
   buttonDisabled: { opacity: 0.55 },
-  buttonText: { color: colors.burgundy, fontSize: 16, fontFamily: fonts.sansBold, letterSpacing: 1 },
+  buttonText: { color: colors.burgundyDeep, fontSize: 16, fontFamily: fonts.sansBold, letterSpacing: 1 },
   footer: { color: colors.onDarkMuted, fontFamily: fonts.sans, fontSize: 11, letterSpacing: 1.6, marginTop: 16 },
 });

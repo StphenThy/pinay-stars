@@ -3,7 +3,8 @@ import { Animated, Easing, Image, PanResponder, Pressable, StyleSheet, Text, Vie
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, radius, shadow, space, touch, type } from '../theme';
+import { radius, space, touch } from '../theme';
+import { useTheme, useThemedStyles } from '../theme-context';
 import { usePosters } from '../posters';
 
 // Poster rails use w342; the hero is full-width, so swap in the larger render of the same file.
@@ -65,6 +66,8 @@ function useSlideLayers(slides) {
 }
 
 function PhotoHero({ slides, width, height }) {
+  const { colors } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const { layers, opacity, zoom } = useSlideLayers(slides);
   // Render the top layer last so it paints over the other.
   const order = layers.top === 'a' ? ['b', 'a'] : ['a', 'b'];
@@ -88,6 +91,8 @@ function PhotoHero({ slides, width, height }) {
 }
 
 function OptionRow({ icon, title, body, onPress, tone, delay }) {
+  const { colors } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const rise = useRef(new Animated.Value(16)).current;
   const fade = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -99,7 +104,9 @@ function OptionRow({ icon, title, body, onPress, tone, delay }) {
 
   const primary = tone === 'primary';
   const gold = tone === 'gold';
-  const fg = primary ? colors.white : colors.burgundyDeep;
+  // The gold card keeps the deepest wine on it in both themes; the plain card writes in
+  // the brand text colour, which lightens at night along with the card underneath it.
+  const fg = primary ? colors.white : gold ? colors.burgundyDeep : colors.burgundy;
   const sub = primary ? colors.onDarkSoft : gold ? colors.goldText : colors.text;
 
   return (
@@ -111,7 +118,7 @@ function OptionRow({ icon, title, body, onPress, tone, delay }) {
         style={({ pressed }) => [s.option, primary && s.optionPrimary, gold && s.optionGold, pressed && { opacity: 0.9 }]}
       >
         <View style={[s.optionIcon, primary && s.optionIconPrimary, gold && s.optionIconGold]}>
-          <Ionicons name={icon} size={20} color={primary ? colors.white : colors.burgundyDeep} />
+          <Ionicons name={icon} size={20} color={fg} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={[s.optionTitle, { color: fg }]}>{title}</Text>
@@ -180,6 +187,7 @@ function useDraggableSheet(snaps, initial) {
 }
 
 export default function EntryScreen({ actresses = [], onSignIn, onRegister, onGuest }) {
+  const s = useThemedStyles(makeStyles);
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const heroHeight = Math.max(300, Math.round(height * 0.42));
@@ -286,7 +294,7 @@ export default function EntryScreen({ actresses = [], onSignIn, onRegister, onGu
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = ({ colors, type, shadow }) => StyleSheet.create({
   page: { flex: 1, backgroundColor: colors.burgundyDeep, alignItems: 'center' },
 
   hero: { backgroundColor: colors.burgundyDeep, overflow: 'hidden' },
@@ -294,7 +302,7 @@ const s = StyleSheet.create({
 
   heroCopy: { position: 'absolute', paddingHorizontal: space.page },
   brandRow: { flexDirection: 'row', alignItems: 'center', marginBottom: space.lg },
-  brandLogo: { width: 36, height: 36, borderRadius: radius.sm, backgroundColor: colors.white, overflow: 'hidden', marginRight: space.sm },
+  brandLogo: { width: 36, height: 36, borderRadius: radius.sm, backgroundColor: colors.surface, overflow: 'hidden', marginRight: space.sm },
   brandLogoImage: { width: 36, height: 36 },
   brandName: { ...type.h3, color: colors.white },
   headline: { ...type.display, fontSize: 34, lineHeight: 38, color: colors.white },
@@ -319,7 +327,7 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     minHeight: touch.min + 12,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.line,
@@ -327,7 +335,7 @@ const s = StyleSheet.create({
     paddingHorizontal: space.lg,
     marginBottom: space.md,
   },
-  optionPrimary: { backgroundColor: colors.burgundy, borderColor: colors.burgundy },
+  optionPrimary: { backgroundColor: colors.primary, borderColor: colors.primary },
   optionGold: { backgroundColor: colors.gold, borderColor: colors.gold },
   optionIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.blush, alignItems: 'center', justifyContent: 'center', marginRight: space.md },
   optionIconPrimary: { backgroundColor: colors.onDarkFillStrong },

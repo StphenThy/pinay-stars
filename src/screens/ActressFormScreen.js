@@ -2,10 +2,12 @@ import React, { useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import AppHeader from '../components/AppHeader';
 import { Avatar, Button, Chip, Kicker } from '../components/ui';
-import { colors, radius, shadow, statusMeta, fonts } from '../theme';
+import { radius, fonts } from '../theme';
+import { useTheme, useThemedStyles } from '../theme-context';
 import { BIO_LIMIT, GENRES, STATUSES, emptyForm, formFromActress, validateForm } from '../data/actressModel';
 
 function Field({ label, required, hint, error, children }) {
+  const s = useThemedStyles(makeStyles);
   return (
     <View style={s.field}>
       <Text style={s.label}>{label}{required ? <Text style={s.required}> *</Text> : null}</Text>
@@ -16,6 +18,8 @@ function Field({ label, required, hint, error, children }) {
 }
 
 function Input({ value, onChangeText, placeholder, multiline, lines = 1, error, ...rest }) {
+  const { colors } = useTheme();
+  const s = useThemedStyles(makeStyles);
   return (
     <TextInput
       value={value}
@@ -32,6 +36,8 @@ function Input({ value, onChangeText, placeholder, multiline, lines = 1, error, 
 }
 
 export default function ActressFormScreen({ mode, actress, busy, onSave, onCancel }) {
+  const { colors, statusMeta } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const editing = mode === 'edit' && actress;
   const suggesting = mode === 'suggest';
   const [form, setForm] = useState(() => (editing ? formFromActress(actress) : { ...emptyForm(), status: suggesting ? 'review' : 'active' }));
@@ -198,7 +204,7 @@ export default function ActressFormScreen({ mode, actress, busy, onSave, onCance
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = ({ colors, shadow }) => StyleSheet.create({
   page: { paddingBottom: 40 },
   draftPill: { backgroundColor: colors.warningSoft, borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 8 },
   draftPillText: { color: colors.warning, fontFamily: fonts.sansBold, fontSize: 10, letterSpacing: 1 },
@@ -206,7 +212,7 @@ const s = StyleSheet.create({
   title: { fontFamily: fonts.serif, fontSize: 28, color: colors.burgundy, marginTop: 8 },
   lead: { color: colors.text, fontFamily: fonts.sans, fontSize: 13, lineHeight: 21, marginTop: 8 },
   leadStrong: { fontFamily: fonts.sansBold, color: colors.burgundy },
-  card: { margin: 20, backgroundColor: colors.white, borderRadius: radius.lg, padding: 16, ...shadow.card },
+  card: { margin: 20, backgroundColor: colors.surface, borderRadius: radius.lg, padding: 16, ...shadow.card },
   field: { marginBottom: 16 },
   label: { color: colors.burgundy, fontFamily: fonts.sansBold, fontSize: 13, marginBottom: 8 },
   required: { color: colors.danger },

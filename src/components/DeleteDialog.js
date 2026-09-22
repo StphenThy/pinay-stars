@@ -1,10 +1,13 @@
 import React from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, radius, space, type, fonts } from '../theme';
+import { radius, space, fonts } from '../theme';
+import { useTheme, useThemedStyles } from '../theme-context';
 import { Avatar, Button } from './ui';
 
 export default function DeleteDialog({ actress, busy, onConfirm, onCancel }) {
+  const { colors } = useTheme();
+  const s = useThemedStyles(makeStyles);
   if (!actress) return null;
   return (
     <Modal transparent animationType="fade" visible onRequestClose={onCancel}>
@@ -38,9 +41,9 @@ export default function DeleteDialog({ actress, busy, onConfirm, onCancel }) {
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = ({ colors, type }) => StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(46, 0, 14, 0.55)', justifyContent: 'center', padding: space.xxl },
-  card: { backgroundColor: colors.white, borderRadius: radius.xl, padding: space.xxl },
+  card: { backgroundColor: colors.surface, borderRadius: radius.xl, padding: space.xxl },
   iconWrap: { alignSelf: 'center', width: 56, height: 56, borderRadius: 28, backgroundColor: colors.dangerSoft, alignItems: 'center', justifyContent: 'center' },
   title: { ...type.h1, textAlign: 'center', marginTop: space.md },
   body: { ...type.body, textAlign: 'center', marginTop: space.sm },

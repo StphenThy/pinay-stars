@@ -3,7 +3,8 @@ import { Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View, Refres
 import { Ionicons } from '@expo/vector-icons';
 import AppHeader from '../components/AppHeader';
 import { Avatar, Button, Chip, EmptyState, ListStatus, StatusPill } from '../components/ui';
-import { colors, radius, shadow, space, touch, type, fonts } from '../theme';
+import { radius, space, touch, fonts } from '../theme';
+import { useTheme, useThemedStyles } from '../theme-context';
 import { recentlyUpdated, toCsv } from '../data/actressModel';
 
 const TABS = [
@@ -22,6 +23,8 @@ function sinceLabel(stamp) {
 }
 
 export default function ManageScreen({ actresses, source, syncing, lastSync, onProfile, onAdd, onEdit, onDelete, onApprove, onSync, onToast, onRefresh, refreshing, loading, loadError, onRetry }) {
+  const { colors } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const [tab, setTab] = useState('all');
   const [search, setSearch] = useState('');
 
@@ -154,7 +157,7 @@ export default function ManageScreen({ actresses, source, syncing, lastSync, onP
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = ({ colors, type, shadow }) => StyleSheet.create({
   page: { paddingBottom: space.xxxl },
   adminBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.blushDeep, borderRadius: radius.pill, paddingHorizontal: space.md, paddingVertical: space.sm, minHeight: 36 },
   adminBadgeText: { ...type.kicker, marginLeft: space.xs },
@@ -162,17 +165,17 @@ const s = StyleSheet.create({
   heading: { ...type.h1 },
   records: { ...type.smallStrong, color: colors.rose, marginLeft: space.md },
   desc: { ...type.small, paddingHorizontal: space.page, marginTop: space.xs },
-  add: { margin: space.page, marginBottom: space.md, padding: space.lg, borderRadius: radius.lg, backgroundColor: colors.burgundy, flexDirection: 'row', alignItems: 'center' },
+  add: { margin: space.page, marginBottom: space.md, padding: space.lg, borderRadius: radius.lg, backgroundColor: colors.primary, flexDirection: 'row', alignItems: 'center' },
   addIcon: { width: touch.min, height: touch.min, borderRadius: touch.min / 2, backgroundColor: colors.onDarkFillStrong, alignItems: 'center', justifyContent: 'center', marginRight: space.md },
   addTitle: { ...type.title, color: colors.white },
   addBody: { ...type.caption, color: colors.onDarkSoft, marginTop: 2 },
   chevron: { marginLeft: space.sm },
   pendingBanner: { marginHorizontal: space.page, marginBottom: space.md, padding: space.md, borderRadius: radius.lg, backgroundColor: colors.warningSoft, borderWidth: 1, borderColor: colors.warningLine, flexDirection: 'row', alignItems: 'center' },
-  pendingIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.warning, alignItems: 'center', justifyContent: 'center', marginRight: space.md },
+  pendingIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.warningFill, alignItems: 'center', justifyContent: 'center', marginRight: space.md },
   pendingIconText: { ...type.title, color: colors.white },
   pendingTitle: { ...type.bodyStrong, color: colors.warning },
   pendingBody: { ...type.caption, fontFamily: fonts.sans, marginTop: 2 },
-  roster: { marginHorizontal: space.page, marginBottom: space.md, backgroundColor: colors.white, borderRadius: radius.lg, padding: space.lg, ...shadow.card },
+  roster: { marginHorizontal: space.page, marginBottom: space.md, backgroundColor: colors.surface, borderRadius: radius.lg, padding: space.lg, ...shadow.card },
   rosterHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   rosterKicker: { ...type.kicker },
   rosterState: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.successSoft, borderRadius: radius.pill, paddingHorizontal: space.md, paddingVertical: space.xs },
@@ -181,10 +184,10 @@ const s = StyleSheet.create({
   rosterTitle: { ...type.h1, marginTop: space.sm },
   rosterSub: { ...type.small, marginTop: 2 },
   rosterWarn: { ...type.caption, fontFamily: fonts.sans, color: colors.warning, lineHeight: 18, marginTop: space.sm },
-  search: { height: 52, marginHorizontal: space.page, backgroundColor: colors.white, borderRadius: radius.md, flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.md, borderWidth: 1, borderColor: colors.line },
+  search: { height: 52, marginHorizontal: space.page, backgroundColor: colors.surface, borderRadius: radius.md, flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.md, borderWidth: 1, borderColor: colors.line },
   input: { ...type.small, color: colors.textStrong, flex: 1, marginLeft: space.sm, minHeight: touch.min },
   tabs: { paddingHorizontal: space.page, paddingVertical: space.md },
-  card: { marginHorizontal: space.page, marginBottom: space.md, padding: space.md, borderRadius: radius.lg, backgroundColor: colors.white, ...shadow.card },
+  card: { marginHorizontal: space.page, marginBottom: space.md, padding: space.md, borderRadius: radius.lg, backgroundColor: colors.surface, ...shadow.card },
   cardTop: { flexDirection: 'row', alignItems: 'center' },
   avatar: { width: 54, height: 68, marginRight: space.md },
   cardTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },

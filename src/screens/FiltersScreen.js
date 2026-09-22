@@ -1,10 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button, Chip, Kicker } from '../components/ui';
-import { colors, radius, statusMeta, fonts } from '../theme';
+import { radius, fonts } from '../theme';
+import { useTheme, useThemedStyles } from '../theme-context';
 import { DEFAULT_FILTERS, ERAS, GENRES, SORTS, STATUSES, applyFilters } from '../data/actressModel';
 
 function Radio({ label, tag, active, onPress }) {
+  const s = useThemedStyles(makeStyles);
   return (
     <Pressable onPress={onPress} style={[s.radio, active && s.radioActive]}>
       <View style={[s.radioDot, active && s.radioDotActive]}>{active ? <View style={s.radioInner} /> : null}</View>
@@ -15,6 +17,8 @@ function Radio({ label, tag, active, onPress }) {
 }
 
 export default function FiltersScreen({ visible, actresses, filters, query, onApply, onClose }) {
+  const { colors } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const [draft, setDraft] = useState(filters);
 
   const genreCounts = useMemo(() => {
@@ -112,9 +116,9 @@ export default function FiltersScreen({ visible, actresses, filters, query, onAp
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = ({ colors }) => StyleSheet.create({
   page: { flex: 1, backgroundColor: colors.background },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 52, paddingBottom: 12, backgroundColor: colors.white, borderBottomWidth: 1, borderColor: colors.line },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 52, paddingBottom: 12, backgroundColor: colors.surface, borderBottomWidth: 1, borderColor: colors.line },
   headerLink: { color: colors.rose, fontFamily: fonts.sansBold, fontSize: 13 },
   headerTitle: { fontFamily: fonts.serif, fontSize: 18, color: colors.burgundy },
   body: { padding: 20, paddingBottom: 40 },
@@ -122,7 +126,7 @@ const s = StyleSheet.create({
   sectionTitle: { fontFamily: fonts.serif, fontSize: 18, color: colors.burgundy },
   wrap: { flexDirection: 'row', flexWrap: 'wrap' },
   chipWrap: { marginRight: 8, marginBottom: 8 },
-  radio: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.white, borderRadius: radius.md, paddingVertical: 12, paddingHorizontal: 12, marginBottom: 8, borderWidth: 1, borderColor: colors.line },
+  radio: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.md, paddingVertical: 12, paddingHorizontal: 12, marginBottom: 8, borderWidth: 1, borderColor: colors.line },
   radioActive: { borderColor: colors.burgundy, backgroundColor: colors.blush },
   radioDot: { width: 20, height: 20, borderRadius: radius.sm, borderWidth: 2, borderColor: colors.muted, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   radioDotActive: { borderColor: colors.burgundy },
@@ -130,11 +134,11 @@ const s = StyleSheet.create({
   radioLabel: { flex: 1, color: colors.textStrong, fontSize: 13, fontFamily: fonts.sansSemi },
   radioLabelActive: { color: colors.burgundy },
   radioTag: { color: colors.rose, fontFamily: fonts.sansBold, fontSize: 11, backgroundColor: colors.blushDeep, borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 4, overflow: 'hidden' },
-  radioTagActive: { backgroundColor: colors.white },
+  radioTagActive: { backgroundColor: colors.surface },
   resetLink: { color: colors.rose, fontFamily: fonts.sansBold, fontSize: 13, textDecorationLine: 'underline' },
-  curators: { marginTop: 24, backgroundColor: colors.burgundy, borderRadius: radius.lg, padding: 16 },
+  curators: { marginTop: 24, backgroundColor: colors.primary, borderRadius: radius.lg, padding: 16 },
   curatorsTitle: { color: colors.white, fontFamily: fonts.sansBold, fontSize: 15, marginTop: 8 },
   curatorsBody: { color: colors.onDarkSoft, fontFamily: fonts.sans, fontSize: 13, marginTop: 4 },
-  footer: { padding: 20, paddingBottom: 24, backgroundColor: colors.white, borderTopWidth: 1, borderColor: colors.line },
+  footer: { padding: 20, paddingBottom: 24, backgroundColor: colors.surface, borderTopWidth: 1, borderColor: colors.line },
   footerCount: { textAlign: 'center', color: colors.text, fontFamily: fonts.sans, fontSize: 13, marginBottom: 12 },
 });

@@ -2,12 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import AppHeader from '../components/AppHeader';
 import { Avatar, Button, Kicker, StatusPill } from '../components/ui';
-import { colors, fonts, radius, shadow } from '../theme';
+import ThemePicker from '../components/ThemePicker';
+import { fonts, radius } from '../theme';
+import { useTheme, useThemedStyles } from '../theme-context';
 import { initialsOf, roleLabel } from '../auth';
 import { authApi } from '../api';
 import { normalizeActress } from '../data/actressModel';
 
 export default function AccountScreen({ account, favoritesCount, pendingCount, busy, onBack, onLogout, onChangePassword, onUpdateProfile, onNavigate, onProfile }) {
+  const { colors } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -155,6 +159,13 @@ export default function AccountScreen({ account, favoritesCount, pendingCount, b
         ) : null}
 
         <View style={s.card}>
+          <Kicker>APPEARANCE</Kicker>
+          <Text style={s.cardTitle}>Theme</Text>
+          <Text style={s.cardBody}>Pick how Pinay Stars looks, or let it follow your phone's own light and dark setting. The choice is saved on this device and applies straight away.</Text>
+          <ThemePicker />
+        </View>
+
+        <View style={s.card}>
           <Kicker>SECURITY</Kicker>
           <Text style={s.cardTitle}>Change Password</Text>
           <Text style={s.cardBody}>Changing the password signs out every other device.</Text>
@@ -174,11 +185,11 @@ export default function AccountScreen({ account, favoritesCount, pendingCount, b
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = ({ colors, shadow }) => StyleSheet.create({
   page: { paddingBottom: 40 },
   hero: { alignItems: 'center', paddingHorizontal: 20, paddingTop: 8 },
-  avatar: { width: 92, height: 92, borderRadius: 46, backgroundColor: colors.burgundy, alignItems: 'center', justifyContent: 'center', borderWidth: 4, borderColor: colors.blushDeep },
-  avatarMember: { backgroundColor: colors.rose },
+  avatar: { width: 92, height: 92, borderRadius: 46, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 4, borderColor: colors.blushDeep },
+  avatarMember: { backgroundColor: colors.roseFill },
   avatarPhoto: { width: 92, height: 92, borderWidth: 4, borderColor: colors.blushDeep },
   editLink: { marginTop: 12, paddingVertical: 8, paddingHorizontal: 12, borderRadius: radius.pill, backgroundColor: colors.blush },
   editLinkText: { color: colors.burgundy, fontFamily: fonts.sansBold, fontSize: 13 },
@@ -190,7 +201,7 @@ const s = StyleSheet.create({
   avatarTextMember: { color: colors.white },
   name: { fontFamily: fonts.serif, fontSize: 28, color: colors.burgundy, marginTop: 12 },
   username: { color: colors.muted, fontFamily: fonts.sans, fontSize: 13, marginTop: 2 },
-  badge: { backgroundColor: colors.burgundy, borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 8, marginTop: 12 },
+  badge: { backgroundColor: colors.primary, borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 8, marginTop: 12 },
   badgeMember: { backgroundColor: colors.blushDeep },
   badgeText: { color: colors.gold, fontFamily: fonts.sansBold, fontSize: 11, letterSpacing: 1 },
   badgeTextMember: { color: colors.burgundy },
@@ -201,7 +212,7 @@ const s = StyleSheet.create({
   statLabel: { color: colors.rose, fontSize: 11, letterSpacing: 1, fontFamily: fonts.sansBold, marginTop: 2 },
   statDivider: { width: 1, height: 30, backgroundColor: colors.line },
   quick: { flexDirection: 'row', margin: 20 },
-  card: { marginHorizontal: 20, marginBottom: 20, backgroundColor: colors.white, borderRadius: radius.lg, padding: 16, ...shadow.card },
+  card: { marginHorizontal: 20, marginBottom: 20, backgroundColor: colors.surface, borderRadius: radius.lg, padding: 16, ...shadow.card },
   cardTitle: { fontFamily: fonts.serif, fontSize: 18, color: colors.burgundy, marginTop: 4 },
   cardBody: { color: colors.text, fontFamily: fonts.sans, fontSize: 13, marginTop: 4, marginBottom: 12, lineHeight: 19 },
   mineRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12 },

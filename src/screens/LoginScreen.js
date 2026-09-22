@@ -3,9 +3,11 @@ import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleShee
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from '../components/ui';
-import { colors, fonts, radius, shadow, gradients } from '../theme';
+import { fonts, radius } from '../theme';
+import { useTheme, useThemedStyles } from '../theme-context';
 
 function Field({ label, children }) {
+  const s = useThemedStyles(makeStyles);
   return (
     <View style={{ marginBottom: 12 }}>
       <Text style={s.label}>{label}</Text>
@@ -15,6 +17,8 @@ function Field({ label, children }) {
 }
 
 export default function LoginScreen({ busy, error, onLogin, onRegister, onBack, onGuest, reason, initialMode = 'login' }) {
+  const { colors, gradients } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const [mode, setMode] = useState(initialMode);
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -147,7 +151,7 @@ export default function LoginScreen({ busy, error, onLogin, onRegister, onBack, 
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = ({ colors, shadow }) => StyleSheet.create({
   page: { flex: 1, backgroundColor: colors.background },
   scroll: { flexGrow: 1, paddingBottom: 32 },
   top: { paddingTop: 8, paddingBottom: 20, paddingHorizontal: 24, alignItems: 'center', borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
@@ -165,10 +169,10 @@ const s = StyleSheet.create({
   body: { width: '100%', maxWidth: 400, alignSelf: 'center', paddingHorizontal: 36, paddingTop: 20, paddingBottom: 12 },
   tabs: { flexDirection: 'row', backgroundColor: colors.blush, borderRadius: radius.pill, padding: 4, marginHorizontal: 8 },
   tab: { flex: 1, paddingVertical: 10, borderRadius: radius.pill, alignItems: 'center' },
-  tabActive: { backgroundColor: colors.burgundy },
+  tabActive: { backgroundColor: colors.primary },
   tabText: { color: colors.burgundy, fontFamily: fonts.sansBold, fontSize: 15 },
   tabTextActive: { color: colors.white },
-  card: { marginTop: 16, backgroundColor: colors.white, borderRadius: radius.lg, padding: 16, ...shadow.card },
+  card: { marginTop: 16, backgroundColor: colors.surface, borderRadius: radius.lg, padding: 16, ...shadow.card },
   label: { color: colors.burgundy, fontFamily: fonts.sansBold, fontSize: 13, marginBottom: 8 },
   input: { backgroundColor: colors.background, borderWidth: 1, borderColor: colors.line, borderRadius: radius.md, paddingHorizontal: 12, paddingVertical: 12, fontFamily: fonts.sans, fontSize: 15, color: colors.textStrong },
   passwordRow: { flexDirection: 'row', alignItems: 'center' },

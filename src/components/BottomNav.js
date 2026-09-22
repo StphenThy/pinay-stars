@@ -2,7 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, radius, shadow, space, touch, type, fonts } from '../theme';
+import { radius, space, touch, fonts } from '../theme';
+import { useTheme, useThemedStyles } from '../theme-context';
 import { useAuth } from '../auth';
 
 const BASE_ITEMS = [
@@ -13,15 +14,16 @@ const BASE_ITEMS = [
 const MANAGE_ITEM = { key: 'manage', icon: 'shield-checkmark', label: 'Manage' };
 const SUGGEST_ITEM = { key: 'suggest', icon: 'sparkles', label: 'Suggest' };
 
-const BAR_COLOR = '#FFFDFC';
 
 function Tab({ item, active, badge, warn, onPress }) {
+  const { colors } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const anim = useRef(new Animated.Value(active ? 1 : 0)).current;
   useEffect(() => {
     Animated.spring(anim, { toValue: active ? 1 : 0, useNativeDriver: false, friction: 7, tension: 80 }).start();
   }, [active, anim]);
 
-  const bg = anim.interpolate({ inputRange: [0, 1], outputRange: ['rgba(101,0,29,0)', 'rgba(101,0,29,0.1)'] });
+  const bg = anim.interpolate({ inputRange: [0, 1], outputRange: [colors.navActiveClear, colors.navActive] });
   const lift = anim.interpolate({ inputRange: [0, 1], outputRange: [0, -2] });
   const scale = anim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.15] });
 
@@ -45,6 +47,7 @@ function Tab({ item, active, badge, warn, onPress }) {
 }
 
 export default function BottomNav({ active, onNavigate, favoriteCount, pendingCount }) {
+  const s = useThemedStyles(makeStyles);
   const { isAdmin } = useAuth();
   const insets = useSafeAreaInsets();
   const items = [...BASE_ITEMS, isAdmin ? MANAGE_ITEM : SUGGEST_ITEM];
@@ -65,12 +68,12 @@ export default function BottomNav({ active, onNavigate, favoriteCount, pendingCo
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = ({ colors, type, shadow }) => StyleSheet.create({
   bar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'flex-start',
-    backgroundColor: BAR_COLOR,
+    backgroundColor: colors.bar,
     borderTopWidth: 1,
     borderColor: colors.line,
     paddingTop: space.sm,
@@ -81,7 +84,7 @@ const s = StyleSheet.create({
   iconPill: { width: 56, height: 34, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
   label: { ...type.micro, fontSize: 11, lineHeight: 14, fontFamily: fonts.sansSemi, marginTop: space.xs, letterSpacing: 0.2 },
   labelActive: { color: colors.burgundy, fontFamily: fonts.sansBold },
-  badge: { position: 'absolute', top: 2, right: 6, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: colors.burgundy, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.xs, borderWidth: 2, borderColor: BAR_COLOR },
-  badgeWarn: { backgroundColor: colors.warning },
+  badge: { position: 'absolute', top: 2, right: 6, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.xs, borderWidth: 2, borderColor: colors.bar },
+  badgeWarn: { backgroundColor: colors.warningFill },
   badgeText: { ...type.micro, color: colors.white },
 });

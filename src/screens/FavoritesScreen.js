@@ -4,10 +4,13 @@ import { Ionicons } from '@expo/vector-icons';
 import AppHeader from '../components/AppHeader';
 import ActressCard from '../components/ActressCard';
 import { EmptyState, ListStatus, Rise } from '../components/ui';
-import { colors, radius, space, type, fonts } from '../theme';
+import { radius, space, fonts } from '../theme';
+import { useTheme, useThemedStyles } from '../theme-context';
 import { useAuth } from '../auth';
 
 export default function FavoritesScreen({ actresses, favorites, onProfile, onFavorite, onNavigate, onRefresh, refreshing, loading, loadError, onRetry }) {
+  const { colors } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const { account, openAccount } = useAuth();
   return (
     <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} tintColor={colors.burgundy} colors={[colors.burgundy]} />}>
@@ -50,7 +53,7 @@ export default function FavoritesScreen({ actresses, favorites, onProfile, onFav
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = ({ colors, type }) => StyleSheet.create({
   page: { paddingBottom: space.xxxl },
   heading: { marginHorizontal: space.page, marginBottom: space.sm, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title: { ...type.h1 },

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, radius, shadow, space, type } from '../theme';
+import { radius, space } from '../theme';
+import { useTheme, useThemedStyles } from '../theme-context';
 import { usePosters } from '../posters';
 import { Rise } from './ui';
 
@@ -13,6 +14,8 @@ const POSTER_H = Math.round(POSTER_W * 1.5); // TMDB posters are 2:3
  * cannot match still get a card: a burgundy tile with the title, so the rail never has holes.
  */
 export default function PosterRail({ titles, kind = 'movie', label, edge = space.page }) {
+  const { colors } = useTheme();
+  const s = useThemedStyles(makeStyles);
   const posters = usePosters(titles, kind);
   const list = (titles || []).filter(Boolean);
   if (!list.length) return null;
@@ -45,13 +48,13 @@ export default function PosterRail({ titles, kind = 'movie', label, edge = space
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = ({ colors, type, shadow }) => StyleSheet.create({
   wrap: { marginTop: space.lg },
   label: { ...type.kicker, marginBottom: space.sm },
   item: { width: POSTER_W, marginRight: space.md },
   poster: { width: POSTER_W, height: POSTER_H, borderRadius: radius.md, overflow: 'hidden', backgroundColor: colors.burgundySoft, ...shadow.card },
   image: { width: '100%', height: '100%' },
-  fallback: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: space.sm, backgroundColor: colors.burgundy },
+  fallback: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: space.sm, backgroundColor: colors.primary },
   fallbackTitle: { ...type.smallStrong, color: colors.white, textAlign: 'center', marginTop: space.sm },
   title: { ...type.smallStrong, marginTop: space.sm },
   year: { ...type.caption, marginTop: 2 },
